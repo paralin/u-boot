@@ -151,6 +151,16 @@ config AXP_DCDC5_VOLT
 	On A23 / A31 / A33 / A80 / A83T / R40 boards dcdc5 is VCC-DRAM and
 	should be 1.5V, 1.35V if DDR3L is used.
 
+config AXP_DCDC6_VOLT
+	int "axp pmic dcdc6 voltage"
+	depends on AXP818_POWER
+	default 900 if MACH_SUN8I
+	---help---
+	Set the voltage (mV) to program the axp pmic dcdc6 at, set to 0 to
+	disable dcdc5.
+	On A83T boards dcdc6 is used for SYS, USB0, HDMI and
+	should be 0.9V.
+
 config AXP_ALDO1_VOLT
 	int "axp pmic (a)ldo1 voltage"
 	depends on AXP221_POWER || AXP809_POWER || AXP818_POWER

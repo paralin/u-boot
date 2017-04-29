@@ -643,6 +643,9 @@ void sunxi_board_init(void)
 	defined CONFIG_AXP818_POWER
 	power_failed |= axp_set_dcdc5(CONFIG_AXP_DCDC5_VOLT);
 #endif
+#if defined CONFIG_AXP818_POWER
+	power_failed |= axp_set_dcdc6(CONFIG_AXP_DCDC6_VOLT);
+#endif
 
 #if defined CONFIG_AXP221_POWER || defined CONFIG_AXP809_POWER || \
 	defined CONFIG_AXP818_POWER
