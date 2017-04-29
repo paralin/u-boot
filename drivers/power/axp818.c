@@ -109,6 +109,28 @@ int axp_set_dcdc5(unsigned int mvolt)
 				AXP818_OUTPUT_CTRL1_DCDC5_EN);
 }
 
+int axp_set_dcdc6(unsigned int mvolt)
+{
+	int ret;
+	u8 cfg;
+
+	if (mvolt >= 1120)
+		cfg = 50 + axp818_mvolt_to_cfg(mvolt, 1120, 1520, 20);
+	else
+		cfg = axp818_mvolt_to_cfg(mvolt, 600, 1100, 10);
+
+	if (mvolt == 0)
+		return pmic_bus_clrbits(AXP818_OUTPUT_CTRL1,
+					AXP818_OUTPUT_CTRL1_DCDC6_EN);
+
+	ret = pmic_bus_write(AXP818_DCDC6_CTRL, cfg);
+	if (ret)
+		return ret;
+
+	return pmic_bus_setbits(AXP818_OUTPUT_CTRL1,
+				AXP818_OUTPUT_CTRL1_DCDC6_EN);
+}
+
 int axp_set_aldo(int aldo_num, unsigned int mvolt)
 {
 	int ret;

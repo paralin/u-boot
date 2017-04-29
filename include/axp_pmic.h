@@ -27,6 +27,7 @@ int axp_set_dcdc2(unsigned int mvolt);
 int axp_set_dcdc3(unsigned int mvolt);
 int axp_set_dcdc4(unsigned int mvolt);
 int axp_set_dcdc5(unsigned int mvolt);
+int axp_set_dcdc6(unsigned int mvolt);
 int axp_set_aldo1(unsigned int mvolt);
 int axp_set_aldo2(unsigned int mvolt);
 int axp_set_aldo3(unsigned int mvolt);
