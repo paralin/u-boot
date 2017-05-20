@@ -26,7 +26,7 @@ void write_to_env_var(char *varname, u8 *result, ulong len)
 		str_ptr += 2;
 	}
 	*str_ptr = '\0';
-	setenv(varname, str_output);
+	env_set(varname, str_output);
 
 	free(str_output);
 }
