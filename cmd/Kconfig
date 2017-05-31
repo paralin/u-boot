@@ -338,6 +338,11 @@ config CMD_FITUPD
 	  Implements the 'fitupd' command, which allows to automatically
 	  store software updates present on a TFTP server in NOR Flash
 
+config CMD_CFGLOAD
+	bool "odroid - cfgload tool"
+	help
+	  Loads the boot.ini on odroid systems.
+
 config CMD_THOR_DOWNLOAD
 	bool "thor - TIZEN 'thor' download"
 	help

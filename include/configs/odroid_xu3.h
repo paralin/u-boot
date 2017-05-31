@@ -113,4 +113,8 @@
 	"dfu_alt_system="CONFIG_DFU_ALT_SYSTEM \
 	"dfu_alt_info=Autoset by THOR/DFU command run.\0"
 
+#undef CONFIG_BOOTCOMMAND
+#define CONFIG_BOOTCOMMAND "cfgload"
+
 #endif	/* __CONFIG_H */
+
