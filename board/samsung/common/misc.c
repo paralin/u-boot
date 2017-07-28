@@ -120,13 +120,13 @@ void set_board_info(void)
 		unsigned int adcval = 0;
 
 		adc_channel_single_shot("adc", CONFIG_ODROID_REV_AIN, &adcval);
-		setenv_ulong("board_adc_value", adcval);
+		env_set_ulong("board_adc_value", adcval);
 	}
 
 	/* save boot_device value (SD or eMMC) */
 	{
 		struct mmc *mmc = find_mmc_device(0);
-		setenv("boot_device", IS_SD(mmc) ? "SD" : "eMMC");
+		env_set("boot_device", IS_SD(mmc) ? "SD" : "eMMC");
 	}
 #endif
 
