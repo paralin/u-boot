@@ -32,6 +32,9 @@
 #endif
 #include <power/pmic.h>
 #include <mmc.h>
+#if defined(CONFIG_TARGET_ODROID_XU4) || defined(CONFIG_TARGET_ODROID_XU3)
+	#include <adc.h>
+#endif
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -98,10 +101,35 @@ void set_board_info(void)
 #ifdef CONFIG_BOARD_TYPES
 	bdtype = get_board_type();
 	if (!bdtype)
-		bdtype = "";
+		bdtype = "unknown";
 
 	sprintf(info, "%s%s", bdname, bdtype);
 	env_set("board_name", info);
+
+#if defined(CONFIG_TARGET_ODROID_XU4) || defined(CONFIG_TARGET_ODROID_XU3)
+	/* save board_name for select dtb */
+	if (!strncmp("xu3-lite" , bdtype, 8))
+		env_set("board_name", "xu3l");
+	else if (!strncmp("xu3", bdtype, 3))
+		env_set("board_name", "xu3");
+	else
+		env_set("board_name", "xu4");
+
+	/* save board_id_value (adc value) */
+	{
+		unsigned int adcval = 0;
+
+		adc_channel_single_shot("adc", CONFIG_ODROID_REV_AIN, &adcval);
+		setenv_ulong("board_adc_value", adcval);
+	}
+
+	/* save boot_device value (SD or eMMC) */
+	{
+		struct mmc *mmc = find_mmc_device(0);
+		setenv("boot_device", IS_SD(mmc) ? "SD" : "eMMC");
+	}
+#endif
+
 #endif
 	snprintf(info, ARRAY_SIZE(info),  "%s%x-%s%s.dtb",
 		 CONFIG_SYS_SOC, s5p_cpu_id, bdname, bdtype);
