@@ -97,11 +97,6 @@ int board_init(void)
 	gd->ram_size -= size;
 	gd->bd->bi_dram[CONFIG_NR_DRAM_BANKS - 1].size -= size;
 #endif
-
-#if defined(CONFIG_TARGET_ODROID_XU4) || defined(CONFIG_TARGET_ODROID_XU3)
-	odroid_misc_init();
-#endif
-
 	return exynos_init();
 }
 
@@ -289,8 +284,11 @@ int board_late_init(void)
 {
 	struct udevice *dev;
 	int ret;
-
+#if defined(CONFIG_TARGET_ODROID_XU4) || defined(CONFIG_TARGET_ODROID_XU3)
+	odroid_misc_init();
+#else
 	stdio_print_current_devices();
+
 	ret = uclass_first_device_err(UCLASS_CROS_EC, &dev);
 	if (ret && ret != -ENODEV) {
 		/* Force console on */
@@ -301,6 +299,7 @@ int board_late_init(void)
 		panic("Cannot init cros-ec device");
 		return -1;
 	}
+#endif
 	return 0;
 }
 #endif
