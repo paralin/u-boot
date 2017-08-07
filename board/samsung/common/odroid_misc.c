@@ -329,7 +329,7 @@ static int filecheck(const char *fname)
 	unsigned long	filesize = 0;
 
 	/* env variable init */
-	setenv("filesize", "0");
+	env_set("filesize", "0");
 
 	memset(cmd, 0x00, sizeof(cmd));
 	sprintf(cmd, "fatload mmc 0:1 40008000 update/%s", fname);
