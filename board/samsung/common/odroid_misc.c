@@ -376,8 +376,6 @@ static uint upload_file(const char *fname, const char *pname,
 			#endif
 			total_fsize += filesize;
 		}
-		if (!is_split || !filesize)
-			goto out;
 
 		mem_addr += filesize;
 		/* load memory overflow */
@@ -387,6 +385,8 @@ static uint upload_file(const char *fname, const char *pname,
 			upinfo->file_size = 0;
 			return	upinfo->mem_addr;
 		}
+		if (!is_split || !filesize)
+			goto out;
 	}
 out:
 	if (total_fsize) {
