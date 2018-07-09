@@ -274,7 +274,7 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 HOSTCC       = cc
 HOSTCXX      = c++
 HOSTCFLAGS   = -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer \
-		$(if $(CONFIG_TOOLS_DEBUG),-g)
+		$(if $(CONFIG_TOOLS_DEBUG),-g) -Wno-stringop-truncation -Wno-sign-compare
 HOSTCXXFLAGS = -O2
 
 # With the move to GCC 6, we have implicitly upgraded our language
