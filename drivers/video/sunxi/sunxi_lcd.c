@@ -25,13 +25,19 @@ struct sunxi_lcd_priv {
 
 static void sunxi_lcdc_config_pinmux(void)
 {
-#ifdef CONFIG_MACH_SUN50I
+#if defined(CONFIG_MACH_SUN50I)
 	int pin;
 
 	for (pin = SUNXI_GPD(0); pin <= SUNXI_GPD(21); pin++) {
 		sunxi_gpio_set_cfgpin(pin, SUNXI_GPD_LCD0);
 		sunxi_gpio_set_drv(pin, 3);
 	}
+#elif defined(CONFIG_MACH_SUN8I_A83T) && defined(CONFIG_VIDEO_LCD_IF_LVDS)
+	int pin;
+
+	debug("configuring PD LVDS pins\n");
+	for (pin = SUNXI_GPD(18); pin <= SUNXI_GPD(27); pin++)
+		sunxi_gpio_set_cfgpin(pin, SUNXI_GPD_LVDS0);
 #endif
 }
 
@@ -50,6 +56,10 @@ static int sunxi_lcd_enable(struct udevice *dev, int bpp,
 	setbits_le32(&ccm->ahb_reset1_cfg, 1 << AHB_RESET_OFFSET_LCD0);
 	/* Clock on */
 	setbits_le32(&ccm->ahb_gate1, 1 << AHB_GATE_OFFSET_LCD0);
+
+#ifdef CONFIG_VIDEO_LCD_IF_LVDS
+	setbits_le32(&ccm->ahb_reset2_cfg, 1 << AHB_RESET_OFFSET_LVDS);
+#endif
 
 	lcdc_init(lcdc);
 	sunxi_lcdc_config_pinmux();
@@ -145,7 +155,7 @@ U_BOOT_DRIVER(sunxi_lcd) = {
 	.priv_auto_alloc_size = sizeof(struct sunxi_lcd_priv),
 };
 
-#ifdef CONFIG_MACH_SUN50I
+#if defined(CONFIG_MACH_SUN50I) || defined(CONFIG_MACH_SUN8I_A83T)
 U_BOOT_DEVICE(sunxi_lcd) = {
 	.name = "sunxi_lcd"
 };

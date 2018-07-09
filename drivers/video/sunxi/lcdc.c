@@ -34,6 +34,7 @@ void lcdc_init(struct sunxi_lcdc_reg * const lcdc)
 	/* Init lcdc */
 	writel(0, &lcdc->ctrl); /* Disable tcon */
 	writel(0, &lcdc->int0); /* Disable all interrupts */
+	writel(0, &lcdc->int1);
 
 	/* Disable tcon0 dot clock */
 	clrbits_le32(&lcdc->tcon0_dclk, SUNXI_LCDC_TCON0_DCLK_ENABLE);
@@ -48,17 +49,26 @@ void lcdc_enable(struct sunxi_lcdc_reg * const lcdc, int depth)
 	setbits_le32(&lcdc->ctrl, SUNXI_LCDC_CTRL_TCON_ENABLE);
 #ifdef CONFIG_VIDEO_LCD_IF_LVDS
 	setbits_le32(&lcdc->tcon0_lvds_intf, SUNXI_LCDC_TCON0_LVDS_INTF_ENABLE);
-	setbits_le32(&lcdc->lvds_ana0, SUNXI_LCDC_LVDS_ANA0);
 #ifdef CONFIG_SUNXI_GEN_SUN6I
+	writel(SUNXI_LCDC_LVDS_ANA0_C(2) |
+	       SUNXI_LCDC_LVDS_ANA0_V(3) |
+	       SUNXI_LCDC_LVDS_ANA0_PD(2) |
+	       SUNXI_LCDC_LVDS_ANA0_EN_LDO, &lcdc->lvds_ana0);
+
 	udelay(2); /* delay at least 1200 ns */
+
 	setbits_le32(&lcdc->lvds_ana0, SUNXI_LCDC_LVDS_ANA0_EN_MB);
+
 	udelay(2); /* delay at least 1200 ns */
+
 	setbits_le32(&lcdc->lvds_ana0, SUNXI_LCDC_LVDS_ANA0_DRVC);
+
 	if (depth == 18)
 		setbits_le32(&lcdc->lvds_ana0, SUNXI_LCDC_LVDS_ANA0_DRVD(0x7));
 	else
 		setbits_le32(&lcdc->lvds_ana0, SUNXI_LCDC_LVDS_ANA0_DRVD(0xf));
 #else
+	setbits_le32(&lcdc->lvds_ana0, SUNXI_LCDC_LVDS_ANA0);
 	setbits_le32(&lcdc->lvds_ana0, SUNXI_LCDC_LVDS_ANA0_UPDATE);
 	udelay(2); /* delay at least 1200 ns */
 	setbits_le32(&lcdc->lvds_ana1, SUNXI_LCDC_LVDS_ANA1_INIT1);
@@ -86,7 +96,7 @@ void lcdc_tcon0_mode_set(struct sunxi_lcdc_reg * const lcdc,
 	writel(SUNXI_LCDC_TCON0_CTRL_ENABLE |
 	       SUNXI_LCDC_TCON0_CTRL_CLK_DELAY(clk_delay), &lcdc->tcon0_ctrl);
 
-	writel(SUNXI_LCDC_TCON0_DCLK_ENABLE |
+	writel(SUNXI_LCDC_TCON0_DCLK_ENABLE_1 |
 	       SUNXI_LCDC_TCON0_DCLK_DIV(clk_div), &lcdc->tcon0_dclk);
 
 	writel(SUNXI_LCDC_X(mode->hactive.typ) |
@@ -112,6 +122,8 @@ void lcdc_tcon0_mode_set(struct sunxi_lcdc_reg * const lcdc,
 #ifdef CONFIG_VIDEO_LCD_IF_LVDS
 	val = (depth == 18) ? 1 : 0;
 	writel(SUNXI_LCDC_TCON0_LVDS_INTF_BITWIDTH(val) |
+	       SUNXI_LCDC_TCON0_LVDS_IF_CLK_POL_NORMAL |
+	       SUNXI_LCDC_TCON0_LVDS_IF_DATA_POL_NORMAL |
 	       SUNXI_LCDC_TCON0_LVDS_CLK_SEL_TCON0, &lcdc->tcon0_lvds_intf);
 #endif
 
@@ -144,7 +156,7 @@ void lcdc_tcon0_mode_set(struct sunxi_lcdc_reg * const lcdc,
 #endif
 	writel(val, &lcdc->tcon0_io_polarity);
 
-	writel(0, &lcdc->tcon0_io_tristate);
+	writel(0xe0000000, &lcdc->tcon0_io_tristate);
 }
 
 void lcdc_tcon1_mode_set(struct sunxi_lcdc_reg * const lcdc,
@@ -216,7 +228,9 @@ void lcdc_pll_set(struct sunxi_ccm_reg *ccm, int tcon, int dotclock,
 	int value, n, m, min_m, max_m, diff, step;
 	int best_n = 0, best_m = 0, best_diff = 0x0FFFFFFF;
 	int best_double = 0;
+#ifdef CONFIG_MACH_SUN6I
 	bool use_mipi_pll = false;
+#endif
 
 #ifdef CONFIG_SUNXI_DE2
 	step = 6000;
@@ -303,11 +317,17 @@ void lcdc_pll_set(struct sunxi_ccm_reg *ccm, int tcon, int dotclock,
 	}
 
 	if (tcon == 0) {
-		u32 pll;
+#ifdef CONFIG_MACH_SUN8I_A83T
+		writel(CCM_LCD_CH0_CTRL_GATE, &ccm->lcd0_clk_cfg);
+#else
+		u32 pll = 0;
 
+#ifdef CONFIG_MACH_SUN6I
 		if (use_mipi_pll)
 			pll = CCM_LCD_CH0_CTRL_MIPI_PLL;
-		else if (best_double)
+		else
+#endif
+		if (best_double)
 			pll = CCM_LCD_CH0_CTRL_PLL3_2X;
 		else
 			pll = CCM_LCD_CH0_CTRL_PLL3;
@@ -317,6 +337,7 @@ void lcdc_pll_set(struct sunxi_ccm_reg *ccm, int tcon, int dotclock,
 #else
 		writel(CCM_LCD_CH0_CTRL_GATE | CCM_LCD_CH0_CTRL_RST | pll,
 		       &ccm->lcd0_clk_cfg);
+#endif
 #endif
 	}
 #ifndef CONFIG_SUNXI_DE2

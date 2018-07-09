@@ -79,15 +79,18 @@ struct sunxi_lcdc_reg {
 #define SUNXI_LCDC_TCON0_CTRL_ENABLE		(1 << 31)
 #define SUNXI_LCDC_TCON0_DCLK_DIV(n)		((n) << 0)
 #define SUNXI_LCDC_TCON0_DCLK_ENABLE		(0xf << 28)
+#define SUNXI_LCDC_TCON0_DCLK_ENABLE_1		(1 << 31)
 #define SUNXI_LCDC_TCON0_TIMING_H_BP(n)		(((n) - 1) << 0)
 #define SUNXI_LCDC_TCON0_TIMING_H_TOTAL(n)	(((n) - 1) << 16)
 #define SUNXI_LCDC_TCON0_TIMING_V_BP(n)		(((n) - 1) << 0)
 #define SUNXI_LCDC_TCON0_TIMING_V_TOTAL(n)	(((n) * 2) << 16)
-#ifdef CONFIG_SUNXI_GEN_SUN6I
+#if defined(CONFIG_SUNXI_GEN_SUN6I) || defined(CONFIG_MACH_SUN8I_A83T)
 #define SUNXI_LCDC_TCON0_LVDS_CLK_SEL_TCON0	(1 << 20)
 #else
 #define SUNXI_LCDC_TCON0_LVDS_CLK_SEL_TCON0	0 /* NA */
 #endif
+#define SUNXI_LCDC_TCON0_LVDS_IF_CLK_POL_NORMAL		(1 << 4)
+#define SUNXI_LCDC_TCON0_LVDS_IF_DATA_POL_NORMAL	(0xf)
 #define SUNXI_LCDC_TCON0_LVDS_INTF_BITWIDTH(n)	((n) << 26)
 #define SUNXI_LCDC_TCON0_LVDS_INTF_ENABLE	(1 << 31)
 #define SUNXI_LCDC_TCON0_IO_POL_DCLK_PHASE(x)	((x) << 28)
@@ -103,10 +106,15 @@ struct sunxi_lcdc_reg {
 #define SUNXI_LCDC_MUX_CTRL_SRC1_MASK		(0xf << 4)
 #define SUNXI_LCDC_MUX_CTRL_SRC1(x)		((x) << 4)
 #ifdef CONFIG_SUNXI_GEN_SUN6I
-#define SUNXI_LCDC_LVDS_ANA0			0x40040320
 #define SUNXI_LCDC_LVDS_ANA0_EN_MB		(1 << 31)
 #define SUNXI_LCDC_LVDS_ANA0_DRVC		(1 << 24)
 #define SUNXI_LCDC_LVDS_ANA0_DRVD(x)		((x) << 20)
+#define SUNXI_LCDC_LVDS_ANA0_EN_LDO		(1 << 30)
+#define SUNXI_LCDC_LVDS_ANA0_EN_DRVC		(1 << 24)
+#define SUNXI_LCDC_LVDS_ANA0_EN_DRVD(x)		(((x) & 0xf) << 20)
+#define SUNXI_LCDC_LVDS_ANA0_C(x)		(((x) & 3) << 17)
+#define SUNXI_LCDC_LVDS_ANA0_V(x)		(((x) & 3) << 8)
+#define SUNXI_LCDC_LVDS_ANA0_PD(x)		(((x) & 3) << 4)
 #else
 #define SUNXI_LCDC_LVDS_ANA0			0x3f310000
 #define SUNXI_LCDC_LVDS_ANA0_UPDATE		(1 << 22)

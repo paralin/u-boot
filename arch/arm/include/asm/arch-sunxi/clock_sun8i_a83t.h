@@ -280,10 +280,16 @@ struct sunxi_ccm_reg {
 #define CCM_DRAM_GATE_OFFSET_DE_BE0	26
 #define CCM_DRAM_GATE_OFFSET_DE_BE1	27
 
-
 #define MBUS_CLK_DEFAULT		0x81000002 /* PLL6 / 2 */
 
 #define MBUS_CLK_GATE			(0x1 << 31)
+
+#define CCM_LCD_CH0_CTRL_PLL3		(0 << 24)
+#define CCM_LCD_CH0_CTRL_GATE		(0x1 << 31)
+
+#define CCM_LCD_CH1_CTRL_M(n)		((((n) - 1) & 0xf) << 0)
+#define CCM_LCD_CH1_CTRL_PLL3		(0 << 24)
+#define CCM_LCD_CH1_CTRL_GATE		(0x1 << 31)
 
 /* ahb_reset0 offsets */
 #define AHB_RESET_OFFSET_GMAC		17
