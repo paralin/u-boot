@@ -1128,6 +1128,13 @@ config CMD_MTD
 	help
 	  MTD commands support.
 
+config CMD_MYDBG
+	bool "mydbg - My custom debugging command"
+	depends on MACH_SUN8I_A83T
+	help
+	  Nothing to see here, just an easy to access temporary debugging
+	  command for development.
+
 config CMD_NAND
 	bool "nand"
 	default y if NAND_SUNXI

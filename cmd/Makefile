@@ -99,6 +99,7 @@ obj-$(CONFIG_CMD_MTDPARTS) += mtdparts.o
 ifneq ($(CONFIG_CMD_NAND)$(CONFIG_CMD_SF),)
 obj-y += legacy-mtd-utils.o
 endif
+obj-$(CONFIG_CMD_MYDBG) += mydbg.o
 obj-$(CONFIG_CMD_NAND) += nand.o
 obj-$(CONFIG_CMD_NET) += net.o
 obj-$(CONFIG_CMD_NVEDIT_EFI) += nvedit_efi.o
