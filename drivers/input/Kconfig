@@ -92,3 +92,10 @@ config DM_TOUCHPANEL
 	  using driver model. The API is implemented by touchpanel.h and
 	  includes methods to start/stop the device and check for available
 	  input.
+
+config EDT_FT5X06_TOUCHPANEL
+	bool "Enable EDT FT5x06 touchpanel support"
+	depends on DM_TOUCHPANEL
+	help
+	  This adds a support for EDT FT5x06 touch panels that can be used
+	  for controlling u-boot on tablets using touch input only.
