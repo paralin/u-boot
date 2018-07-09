@@ -782,6 +782,7 @@ int conf_write(const char *name)
 	const char *str;
 	char dirname[PATH_MAX+1], tmpname[PATH_MAX+22], newname[PATH_MAX+8];
 	char *env;
+	int ret;
 
 	dirname[0] = 0;
 	if (name && name[0]) {
@@ -804,10 +805,14 @@ int conf_write(const char *name)
 	} else
 		basename = conf_get_configname();
 
-	sprintf(newname, "%s%s", dirname, basename);
+	ret = snprintf(newname, sizeof newname, "%s%s", dirname, basename);
+	if (ret == sizeof newname)
+		return 1;
 	env = getenv("KCONFIG_OVERWRITECONFIG");
 	if (!env || !*env) {
-		sprintf(tmpname, "%s.tmpconfig.%d", dirname, (int)getpid());
+		ret = snprintf(tmpname, sizeof tmpname, "%s.tmpconfig.%d", dirname, (int)getpid());
+		if (ret == sizeof tmpname)
+			return 1;
 		out = fopen(tmpname, "w");
 	} else {
 		*tmpname = 0;
