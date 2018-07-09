@@ -1807,6 +1807,15 @@ endmenu
 
 source "cmd/ti/Kconfig"
 
+menu "sunxi specific command line interface"
+
+config CMD_SUNXI_ARISC
+	bool "command for starting ARISC code on sunxi platforms"
+	help
+	   Support for starting OpenRISC coprocessor on sunxi platforms.
+
+endmenu
+
 config CMD_BOOTSTAGE
 	bool "Enable the 'bootstage' command"
 	depends on BOOTSTAGE
