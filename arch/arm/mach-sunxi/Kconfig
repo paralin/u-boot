@@ -230,6 +230,7 @@ config MACH_SUN8I_A83T
 	select MMC_SUNXI_HAS_NEW_MODE
 	select MMC_SUNXI_HAS_MODE_SWITCH
 	select SUPPORT_SPL
+	select SUNXI_DE2
 
 config MACH_SUN8I_H3
 	bool "sun8i (Allwinner H3)"
@@ -923,7 +924,7 @@ config VIDEO_DE2
 
 choice
 	prompt "LCD panel support"
-	depends on VIDEO_SUNXI
+	depends on VIDEO_SUNXI || VIDEO_DE2
 	---help---
 	Select which type of LCD panel to support.
 
