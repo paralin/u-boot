@@ -105,6 +105,26 @@ void clock_set_pll1(unsigned int clk)
 }
 #endif
 
+#ifdef CONFIG_SUNXI_DE2
+void clock_set_pll3(unsigned int hz)
+{
+	struct sunxi_ccm_reg * const ccm =
+		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
+
+	if (hz == 0) {
+		clrbits_le32(&ccm->pll3_cfg, CCM_PLL3_CTRL_EN);
+		return;
+	}
+
+	/* PLL3 rate = 24000000 * n / (div + 1) / p */
+	writel(CCM_PLL3_CTRL_EN | CCM_PLL3_CTRL_DIV |
+	       CCM_PLL3_CTRL_N(hz / (24000000 / 8)) | CCM_PLL3_CTRL_DIVP(2),
+	       &ccm->pll3_cfg);
+
+	while (!(readl(&ccm->pll_stable_status) & (1 << 3))) {}
+}
+#endif
+
 void clock_set_pll5(unsigned int clk)
 {
 	struct sunxi_ccm_reg * const ccm =
@@ -120,6 +140,39 @@ void clock_set_pll5(unsigned int clk)
 	udelay(5500);
 }
 
+#ifdef CONFIG_SUNXI_DE2
+void clock_set_pll_de(unsigned int clk)
+{
+	struct sunxi_ccm_reg * const ccm =
+		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
+	const int div = 2; /* 12 MHz steps */
+
+	if (clk == 0) {
+		clrbits_le32(&ccm->pll_de_cfg, CCM_PLL_DE_CTRL_EN);
+		return;
+	}
+
+	/* PLL_DE rate = 24000000 * n / (div1 + 1) / (div2 + 1) */
+	writel(CCM_PLL_DE_CTRL_EN | CCM_PLL_DE_CTRL_DIV2 |
+	       CCM_PLL_DE_CTRL_N(clk / (24000000 / div)),
+	       &ccm->pll_de_cfg);
+
+	while (!(readl(&ccm->pll_stable_status) & (1 << 9))) {}
+}
+#endif
+
+unsigned int clock_get_pll3(void)
+{
+	struct sunxi_ccm_reg *const ccm =
+		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
+	uint32_t rval = readl(&ccm->pll3_cfg);
+	int n = ((rval & CCM_PLL3_CTRL_N_MASK) >> CCM_PLL3_CTRL_N_SHIFT);
+	int p = 1 << (rval & CCM_PLL3_CTRL_DIVP_MASK);
+	int div = (rval & CCM_PLL3_CTRL_DIV) ? 2 : 1;
+
+	/* Multiply by 1000 after dividing by m to avoid integer overflows */
+	return (24000 * n / p / div) * 1000;
+}
 
 unsigned int clock_get_pll6(void)
 {
