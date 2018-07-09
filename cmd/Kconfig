@@ -1294,6 +1294,12 @@ config CMD_TSI148
 	  This provides various sub-commands to initialise and configure the
 	  Turndra tsi148 device. See the command help for full details.
 
+config CMD_TOUCH
+	bool "touch - Read input from touchpanel"
+	select DM_TOUCHPANEL
+	help
+	  Shows list of touches on the touch panel device.
+
 config CMD_UFS
 	bool "Enable UFS - Universal Flash Subsystem commands"
 	depends on UFS
