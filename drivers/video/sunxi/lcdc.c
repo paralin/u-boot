@@ -111,11 +111,12 @@ void lcdc_tcon0_mode_set(struct sunxi_lcdc_reg * const lcdc,
 	       SUNXI_LCDC_TCON0_TIMING_V_BP(bp), &lcdc->tcon0_timing_v);
 
 #if defined(CONFIG_VIDEO_LCD_IF_PARALLEL) || defined(CONFIG_VIDEO_DE2)
-	writel(SUNXI_LCDC_X(mode->hsync_len.typ) |
-	       SUNXI_LCDC_Y(mode->vsync_len.typ), &lcdc->tcon0_timing_sync);
+	//XXX: not needed in LVDS mode
+	//writel(SUNXI_LCDC_X(mode->hsync_len.typ) |
+	       //SUNXI_LCDC_Y(mode->vsync_len.typ), &lcdc->tcon0_timing_sync);
 
-	writel(0, &lcdc->tcon0_hv_intf);
-	writel(0, &lcdc->tcon0_cpu_intf);
+	//writel(0, &lcdc->tcon0_hv_intf);
+	//writel(0, &lcdc->tcon0_cpu_intf);
 #endif
 #ifdef CONFIG_VIDEO_LCD_IF_LVDS
 	val = (depth == 18) ? 1 : 0;
@@ -143,9 +144,10 @@ void lcdc_tcon0_mode_set(struct sunxi_lcdc_reg * const lcdc,
 	}
 
 	val = SUNXI_LCDC_TCON0_IO_POL_DCLK_PHASE(dclk_phase);
-	if (mode->flags & DISPLAY_FLAGS_HSYNC_LOW)
+	// not set correctly
+	//if (mode->flags & DISPLAY_FLAGS_HSYNC_LOW)
 		val |= SUNXI_LCDC_TCON_HSYNC_MASK;
-	if (mode->flags & DISPLAY_FLAGS_VSYNC_LOW)
+	//if (mode->flags & DISPLAY_FLAGS_VSYNC_LOW)
 		val |= SUNXI_LCDC_TCON_VSYNC_MASK;
 
 #ifdef CONFIG_VIDEO_VGA_VIA_LCD_FORCE_SYNC_ACTIVE_HIGH
@@ -154,6 +156,7 @@ void lcdc_tcon0_mode_set(struct sunxi_lcdc_reg * const lcdc,
 #endif
 	writel(val, &lcdc->tcon0_io_polarity);
 
+	//writel(0, &lcdc->tcon0_io_tristate);
 	writel(0xe0000000, &lcdc->tcon0_io_tristate);
 }
 
