@@ -523,7 +523,7 @@ void clock_set_pll1(unsigned int hz);
 void clock_set_pll3(unsigned int hz);
 void clock_set_pll3_factors(int m, int n);
 void clock_set_pll5(unsigned int clk, bool sigma_delta_enable);
-void clock_set_pll10(unsigned int hz);
+void clock_set_pll_de(unsigned int hz);
 void clock_set_pll11(unsigned int clk, bool sigma_delta_enable);
 void clock_set_mipi_pll(unsigned int hz);
 unsigned int clock_get_pll3(void);

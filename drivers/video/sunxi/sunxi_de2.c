@@ -44,7 +44,7 @@ static void sunxi_de2_composer_init(void)
 	writel(reg_value, SUNXI_SRAMC_BASE + 0x04);
 #endif
 
-	clock_set_pll10(432000000);
+	clock_set_pll_de(432000000);
 
 	/* Set DE parent to pll10 */
 	clrsetbits_le32(&ccm->de_clk_cfg, CCM_DE2_CTRL_PLL_MASK,
