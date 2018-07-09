@@ -29,7 +29,7 @@ struct sunxi_ccm_reg {
 	u32 pll7_cfg;		/* 0x38 pll7 gpu control */
 	u32 reserved6[2];	/* 0x3c */
 	u32 pll8_cfg;		/* 0x44 pll8 hsic control */
-	u32 pll9_cfg;		/* 0x48 pll9 de control */
+	u32 pll_de_cfg;		/* 0x48 PLL_DE control */
 	u32 pll10_cfg;		/* 0x4c pll10 video1 control */
 	u32 cpu_axi_cfg;	/* 0x50 CPU/AXI divide ratio */
 	u32 ahb1_apb1_div;	/* 0x54 AHB1/APB1 divide ratio */
@@ -166,6 +166,16 @@ struct sunxi_ccm_reg {
 #define PLL8_CFG_DEFAULT		0x42800
 #define CCM_CCI400_CLK_SEL_HSIC		(0x2<<24)
 
+#define CCM_PLL3_CTRL_DIVP_MASK		0x3
+#define CCM_PLL3_CTRL_DIVP(p)		((p) & 0x3)
+#define CCM_PLL3_CTRL_N_SHIFT		8
+#define CCM_PLL3_CTRL_N_MASK		(0xff << CCM_PLL3_CTRL_N_SHIFT)
+#define CCM_PLL3_CTRL_N(n)		(((n) & 0xff) \
+						<< CCM_PLL3_CTRL_N_SHIFT)
+#define CCM_PLL3_CTRL_DIV		(0x1 << 16)
+#define CCM_PLL3_CTRL_CLOCK_OUTPUT	(0x1 << 20)
+#define CCM_PLL3_CTRL_EN		(0x1 << 31)
+
 #define CCM_PLL5_DIV1_SHIFT		16
 #define CCM_PLL5_DIV2_SHIFT		18
 #define CCM_PLL5_CTRL_N(n)		(((n) - 1) << 8)
@@ -179,6 +189,15 @@ struct sunxi_ccm_reg {
 #define CCM_PLL6_CTRL_DIV1_MASK		(0x1 << CCM_PLL6_CTRL_DIV1_SHIFT)
 #define CCM_PLL6_CTRL_DIV2_SHIFT	18
 #define CCM_PLL6_CTRL_DIV2_MASK		(0x1 << CCM_PLL6_CTRL_DIV2_SHIFT)
+
+#define CCM_PLL_DE_CTRL_N_SHIFT		8
+#define CCM_PLL_DE_CTRL_N_MASK		(0xff << CCM_PLL_DE_CTRL_N_SHIFT)
+#define CCM_PLL_DE_CTRL_N(n)		(((n) & 0xff) \
+						<< CCM_PLL_DE_CTRL_N_SHIFT)
+#define CCM_PLL_DE_CTRL_DIV1		(0x1 << 16)
+#define CCM_PLL_DE_CTRL_DIV2		(0x1 << 18)
+#define CCM_PLL_DE_CTRL_CLOCK_OUTPUT	(0x1 << 20)
+#define CCM_PLL_DE_CTRL_EN		(0x1 << 31)
 
 #define AHB1_ABP1_DIV_DEFAULT		0x00002190
 #define AHB1_CLK_SRC_MASK		(0x3<<12)
@@ -299,7 +318,10 @@ struct sunxi_ccm_reg {
 #ifndef __ASSEMBLY__
 void clock_set_pll1(unsigned int hz);
 void clock_set_pll5(unsigned int clk);
+void clock_set_pll_de(unsigned int hz);
+void clock_set_pll3(unsigned int hz);
 unsigned int clock_get_pll6(void);
+unsigned int clock_get_pll3(void);
 #endif
 
 #endif /* _SUNXI_CLOCK_SUN8I_A83T_H */
