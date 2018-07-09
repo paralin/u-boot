@@ -839,6 +839,13 @@ config CMD_ADC
 	  Shows ADC device info and permit printing one-shot analog converted
 	  data from a named Analog to Digital Converter.
 
+config CMD_AXP
+	bool "axp - Read information from AXP813 PMIC"
+	depends on AXP818_POWER
+	help
+	  Shows A/D voltage, battery presence, battery capacity, charger
+	  presence based on register values inside AXP813.
+
 config CMD_BCB
 	bool "bcb"
 	depends on MMC
