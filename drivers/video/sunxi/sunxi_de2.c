@@ -46,16 +46,20 @@ static void sunxi_de2_composer_init(void)
 
 	clock_set_pll_de(432000000);
 
-	/* Set DE parent to pll10 */
+#ifdef CONFIG_MACH_SUNXI_H3_H5
+	/* Set DE parent to pll_de */
 	clrsetbits_le32(&ccm->de_clk_cfg, CCM_DE2_CTRL_PLL_MASK,
 			CCM_DE2_CTRL_PLL10);
+#endif
 
 	/* Set ahb gating to pass */
 	setbits_le32(&ccm->ahb_reset1_cfg, 1 << AHB_RESET_OFFSET_DE);
 	setbits_le32(&ccm->ahb_gate1, 1 << AHB_GATE_OFFSET_DE);
 
+#ifdef CONFIG_MACH_SUNXI_H3_H5
 	/* Clock on */
 	setbits_le32(&ccm->de_clk_cfg, CCM_DE2_CTRL_GATE);
+#endif
 }
 
 static void sunxi_de2_mode_set(int mux, const struct display_timing *mode,
