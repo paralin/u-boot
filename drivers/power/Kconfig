@@ -342,6 +342,14 @@ config AXP_FLDO3_VOLT
 	Set the voltage (mV) to program the axp pmic fldo3 at, set to 0 to
 	disable fldo3.
 
+config AXP_GPIO_LDO0_VOLT
+	int "axp pmic gpio ldo0 voltage"
+	depends on AXP818_POWER
+	default 0
+	---help---
+	Set the voltage (mV) to program the axp pmic gpio0 LDO, set to 0 to
+	disable LDO.
+
 config AXP_SW_ON
 	bool "axp pmic sw on"
 	depends on AXP809_POWER || AXP818_POWER
