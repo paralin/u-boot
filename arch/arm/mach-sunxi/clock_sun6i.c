@@ -258,7 +258,7 @@ done:
 #endif
 
 #ifdef CONFIG_SUNXI_DE2
-void clock_set_pll10(unsigned int clk)
+void clock_set_pll_de(unsigned int clk)
 {
 	struct sunxi_ccm_reg * const ccm =
 		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
