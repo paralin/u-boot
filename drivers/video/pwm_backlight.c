@@ -83,7 +83,7 @@ static int enable_sequence(struct udevice *dev, int seq)
 
 	switch (seq) {
 	case 0:
-		if (priv->reg) {
+		if (priv->reg && IS_ENABLED(DM_REGULATOR)) {
 			__maybe_unused struct dm_regulator_uclass_platdata
 				*plat;
 
@@ -171,7 +171,7 @@ static int pwm_backlight_set_brightness(struct udevice *dev, int percent)
 	}
 	if (disable) {
 		dm_gpio_set_value(&priv->enable, 0);
-		if (priv->reg) {
+		if (priv->reg && IS_ENABLED(DM_REGULATOR)) {
 			ret = regulator_set_enable(priv->reg, false);
 			if (ret)
 				return log_ret(ret);
