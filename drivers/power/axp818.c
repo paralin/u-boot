@@ -235,6 +235,30 @@ int axp_set_sw(bool on)
 				AXP818_OUTPUT_CTRL2_SW_EN);
 }
 
+int axp_gpio0_enable_ldo_set_voltage(u32 mV)
+{
+	int ret;
+	u8 val;
+
+	if (mV == 0)
+		return 0; // do nothing ATM, which is fine since LDO is disabled
+			  // by default
+	else if (mV <= 700)
+		val = 0;
+	else if (mV >= 3300)
+		val = 0x1a;
+	else
+		val = (mV - 700) / 100;
+
+	printf("setting LDO0 voltage: %u\n", mV);
+
+	ret = pmic_bus_write(AXP_GPIO0_LDO_CTRL, val);
+	if (ret)
+		return ret;
+
+	return pmic_bus_write(AXP_GPIO0_CTRL, AXP_GPIO_CTRL_LDO_ON);
+}
+
 int axp_init(void)
 {
 	u8 axp_chip_id;

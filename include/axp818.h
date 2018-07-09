@@ -65,9 +65,14 @@
 #define AXP_MISC_CTRL			0x8f
 #define AXP_MISC_CTRL_N_VBUSEN_FUNC		(1 << 4)
 #define AXP_GPIO0_CTRL			0x90
+#define AXP_GPIO0_LDO_CTRL		0x91
 #define AXP_GPIO1_CTRL			0x92
 #define AXP_GPIO_CTRL_OUTPUT_LOW	0x00 /* Drive pin low */
 #define AXP_GPIO_CTRL_OUTPUT_HIGH	0x01 /* Drive pin high */
 #define AXP_GPIO_CTRL_INPUT		0x02 /* Input */
+#define AXP_GPIO_CTRL_LDO_ON		0x03 /* LDO on */
 #define AXP_GPIO_STATE			0x94
 #define AXP_GPIO_STATE_OFFSET		0
+
+int axp_gpio0_enable_ldo_set_voltage(u32 mV);
+

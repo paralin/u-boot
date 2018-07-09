@@ -673,6 +673,7 @@ void sunxi_board_init(void)
 	power_failed |= axp_set_fldo(1, CONFIG_AXP_FLDO1_VOLT);
 	power_failed |= axp_set_fldo(2, CONFIG_AXP_FLDO2_VOLT);
 	power_failed |= axp_set_fldo(3, CONFIG_AXP_FLDO3_VOLT);
+	power_failed |= axp_gpio0_enable_ldo_set_voltage(CONFIG_AXP_GPIO_LDO0_VOLT);
 #endif
 
 #if defined CONFIG_AXP809_POWER || defined CONFIG_AXP818_POWER
