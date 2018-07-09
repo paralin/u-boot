@@ -1763,6 +1763,14 @@ config CMD_TIMER
 	help
 	  Access the system timer.
 
+config CMD_TMENU
+	bool "tmenu - Display boot menu and respond to touch"
+	depends on DM_TOUCHPANEL && DM_VIDEO
+	help
+	  Shows a menu of items that can be controlled using touch panel.
+	  This is useful for touch based devices like tablets to select
+	  alternative boot options (multi-boot).
+
 config CMD_SOUND
 	bool "sound"
 	depends on SOUND
