@@ -1,5 +1,5 @@
-#ifndef _LIBFDT_H
-#define _LIBFDT_H
+#ifndef LIBFDT_H
+#define LIBFDT_H
 /*
  * libfdt - Flat Device Tree manipulation
  * Copyright (C) 2006 David Gibson, IBM Corporation.
@@ -2134,4 +2134,4 @@ int fdt_next_region(const void *fdt,
 int fdt_add_alias_regions(const void *fdt, struct fdt_region *region, int count,
 			  int max_regions, struct fdt_region_state *info);
 
-#endif /* _LIBFDT_H */
+#endif /* LIBFDT_H */

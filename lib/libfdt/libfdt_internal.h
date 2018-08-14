@@ -1,5 +1,5 @@
-#ifndef _LIBFDT_INTERNAL_H
-#define _LIBFDT_INTERNAL_H
+#ifndef LIBFDT_INTERNAL_H
+#define LIBFDT_INTERNAL_H
 /*
  * libfdt - Flat Device Tree manipulation
  * Copyright (C) 2006 David Gibson, IBM Corporation.
@@ -47,4 +47,4 @@ static inline struct fdt_reserve_entry *_fdt_mem_rsv_w(void *fdt, int n)
 
 #define FDT_SW_MAGIC		(~FDT_MAGIC)
 
-#endif /* _LIBFDT_INTERNAL_H */
+#endif /* LIBFDT_INTERNAL_H */

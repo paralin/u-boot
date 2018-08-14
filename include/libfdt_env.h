@@ -6,8 +6,8 @@
  * SPDX-License-Identifier:	LGPL-2.1+
  */
 
-#ifndef _LIBFDT_ENV_H
-#define _LIBFDT_ENV_H
+#ifndef LIBFDT_ENV_H
+#define LIBFDT_ENV_H
 
 #include "compiler.h"
 #include "linux/types.h"
@@ -32,4 +32,4 @@ typedef __be64 fdt64_t;
 /* adding a ramdisk needs 0x44 bytes in version 2008.10 */
 #define FDT_RAMDISK_OVERHEAD	0x80
 
-#endif /* _LIBFDT_ENV_H */
+#endif /* LIBFDT_ENV_H */
