@@ -83,3 +83,12 @@ config TWL4030_INPUT
 	bool "Enable TWL4030 Input controller"
 	help
 	  Enable TWL4030 Input controller
+
+config DM_TOUCHPANEL
+	bool "Enable driver model for touchpanel support"
+	depends on DM
+	help
+	  This adds a uclass for touchpanel input and implements support
+	  using driver model. The API is implemented by touchpanel.h and
+	  includes methods to start/stop the device and check for available
+	  input.

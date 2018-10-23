@@ -107,6 +107,7 @@ enum uclass_id {
 	UCLASS_TEE,		/* Trusted Execution Environment device */
 	UCLASS_THERMAL,		/* Thermal sensor */
 	UCLASS_TIMER,		/* Timer device */
+	UCLASS_TOUCHPANEL,	/* Touch panel driver */
 	UCLASS_TPM,		/* Trusted Platform Module TIS interface */
 	UCLASS_UFS,		/* Universal Flash Storage */
 	UCLASS_USB,		/* USB bus */
