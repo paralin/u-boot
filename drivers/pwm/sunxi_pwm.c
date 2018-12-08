@@ -170,6 +170,7 @@ static const struct pwm_ops sunxi_pwm_ops = {
 
 static const struct udevice_id sunxi_pwm_ids[] = {
 	{ .compatible = "allwinner,sun5i-a13-pwm" },
+	{ .compatible = "allwinner,sun8i-h3-pwm" },
 	{ .compatible = "allwinner,sun50i-a64-pwm" },
 	{ }
 };
