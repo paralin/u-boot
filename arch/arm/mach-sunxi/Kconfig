@@ -307,6 +307,7 @@ config MACH_SUN50I_H6
 	select FIT
 	select PHY_SUN4I_USB
 	select SPL_LOAD_FIT
+	select MMC_SUNXI_HAS_NEW_MODE
 	select DRAM_SUN50I_H6
 
 endchoice
