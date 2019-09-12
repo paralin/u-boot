@@ -349,6 +349,7 @@ struct sunxi_ccm_reg {
 #define CCM_MMC_CTRL_SCLK_DLY(x)	((x) << 20)
 #define CCM_MMC_CTRL_OSCM24		(0x0 << 24)
 #define CCM_MMC_CTRL_PLL6		(0x1 << 24)
+#define CCM_MMC_CTRL_PLL6X2		(0x1 << 24) // A64 has PLL_PERIPH0(2X)
 #define CCM_MMC_CTRL_ENABLE		(0x1 << 31)
 
 #define CCM_SATA_CTRL_ENABLE		(0x1 << 31)

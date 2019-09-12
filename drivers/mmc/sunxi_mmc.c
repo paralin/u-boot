@@ -132,7 +132,49 @@ static int mmc_resource_init(int sdc_no)
 }
 #endif
 
-static int mmc_set_mod_clk(struct sunxi_mmc_priv *priv, unsigned int hz)
+/*
+ * New timing modes usable on controllers:
+ *
+ * A83T - 2
+ * H3 - 1, 2
+ * H5 - all
+ * H6 - all
+ * A64 - 1, 2???
+ *
+ * SMHC_NTSR 0x005C: (new mode is default)
+ *
+ * H5, H6  yes
+ * A83T, H3  no
+ *
+ * Clock sources for SMHC clock:
+ *
+ * H3: PLL_PERIPH0 600MHz
+ * H5: PLL_PERIPH0(2x) 1200MHz
+ * H6: PLL_PERIPH0(2x) 1200MHz
+ * A83T: PLL_PERIPH 600MHz
+ * A64: PLL_PERIPH0(2x) 1200MHz
+ *
+ * In new mode MMC clock for the module is post-divided by 2
+ *
+ * - SDMMCx SCLK = SRC_CLK (see above) / M / N / 2 (new mode)
+ * - SDMMCx SCLK = PLL_PERIPH / M / N (old mode)
+ *
+ * New mode needs to be also selected in CCU reg:
+ * H3, A83T
+ *
+ * Clk phase can be selected in CCU reg (for old mode):
+ * H3, A83T
+ *
+ * When using DDR, we need to double the SCLK and set post-div
+ * in CLKCR (in addition to previous requirements).
+ *
+ * H5, despite having new mode and double the clock incidentally
+ * works because new mode is the default, and u-boot thinks incorrectly
+ * that the source clock is half the speed, so it choses the right
+ * dividers.
+ */
+static int mmc_set_mod_clk(struct sunxi_mmc_priv *priv, bool is_ddr,
+			   unsigned int hz)
 {
 	unsigned int pll, pll_hz, div, n, oclk_dly, sclk_dly;
 	bool new_mode = true;
@@ -150,8 +192,11 @@ static int mmc_set_mod_clk(struct sunxi_mmc_priv *priv, unsigned int hz)
 	calibrate = true;
 #endif
 
+	/* A83T in new mode requires double the clock */
 	if (new_mode)
-		hz = hz * 2;
+		hz *= 2;
+	if (is_ddr)
+		hz *= 2;
 
 	if (hz <= 24000000) {
 		pll = CCM_MMC_CTRL_OSCM24;
@@ -160,7 +205,7 @@ static int mmc_set_mod_clk(struct sunxi_mmc_priv *priv, unsigned int hz)
 #ifdef CONFIG_MACH_SUN9I
 		pll = CCM_MMC_CTRL_PLL_PERIPH0;
 		pll_hz = clock_get_pll4_periph0();
-#elif defined(CONFIG_MACH_SUN50I_H6)
+#elif defined(CONFIG_MACH_SUN50I) || defined(CONFIG_MACH_SUN50I_H6)
 		pll = CCM_MMC_CTRL_PLL6X2;
 		pll_hz = clock_get_pll6() * 2;
 #else
@@ -227,8 +272,14 @@ static int mmc_set_mod_clk(struct sunxi_mmc_priv *priv, unsigned int hz)
 			CCM_MMC_CTRL_SCLK_DLY(sclk_dly);
 	}
 
-	writel(CCM_MMC_CTRL_ENABLE| pll | CCM_MMC_CTRL_N(n) |
+	writel(CCM_MMC_CTRL_ENABLE | pll | CCM_MMC_CTRL_N(n) |
 	       CCM_MMC_CTRL_M(div) | val, priv->mclkreg);
+
+	/* set internal divider if DDR */
+	val = readl(&priv->reg->clkcr);
+	val &= ~SUNXI_MMC_CLK_DIVIDER_MASK;
+	val |= is_ddr ? 1 : 0;
+	writel(val, &priv->reg->clkcr);
 
 	debug("mmc %u set mod-clk req %u parent %u n %u m %u rate %u\n",
 	      priv->mmc_no, hz, pll_hz, 1u << n, div, pll_hz / (1u << n) / div);
@@ -260,21 +311,15 @@ static int mmc_update_clk(struct sunxi_mmc_priv *priv)
 
 static int mmc_config_clock(struct sunxi_mmc_priv *priv, struct mmc *mmc)
 {
-	unsigned rval = readl(&priv->reg->clkcr);
-
 	/* Disable Clock */
-	rval &= ~SUNXI_MMC_CLK_ENABLE;
-	writel(rval, &priv->reg->clkcr);
+	clrbits_le32(&priv->reg->clkcr, SUNXI_MMC_CLK_ENABLE);
+
 	if (mmc_update_clk(priv))
 		return -1;
 
 	/* Set mod_clk to new rate */
-	if (mmc_set_mod_clk(priv, mmc->clock))
+	if (mmc_set_mod_clk(priv, mmc->selected_mode == MMC_DDR_52, mmc->clock))
 		return -1;
-
-	/* Clear internal divider */
-	rval &= ~SUNXI_MMC_CLK_DIVIDER_MASK;
-	writel(rval, &priv->reg->clkcr);
 
 #if defined(CONFIG_MACH_SUN50I) || defined(CONFIG_MACH_SUN50I_H6)
 	/* A64 supports calibration of delays on MMC controller and we
@@ -287,8 +332,8 @@ static int mmc_config_clock(struct sunxi_mmc_priv *priv, struct mmc *mmc)
 #endif
 
 	/* Re-enable Clock */
-	rval |= SUNXI_MMC_CLK_ENABLE;
-	writel(rval, &priv->reg->clkcr);
+	setbits_le32(&priv->reg->clkcr, SUNXI_MMC_CLK_ENABLE);
+
 	if (mmc_update_clk(priv))
 		return -1;
 
@@ -306,6 +351,12 @@ static int sunxi_mmc_set_ios_common(struct sunxi_mmc_priv *priv,
 		priv->fatal_err = 1;
 		return -EINVAL;
 	}
+
+	/* Timing */
+	if (mmc->selected_mode == MMC_DDR_52)
+		setbits_le32(&priv->reg->gctrl, SUNXI_MMC_GCTRL_DDR_MODE);
+	else
+		clrbits_le32(&priv->reg->gctrl, SUNXI_MMC_GCTRL_DDR_MODE);
 
 	/* Change bus width */
 	if (mmc->bus_width == 8)
@@ -722,7 +773,7 @@ struct mmc *sunxi_mmc_init(int sdc_no)
 	/* unassert reset */
 	setbits_le32(&ccm->sd_gate_reset, 1 << (RESET_SHIFT + sdc_no));
 #endif
-	ret = mmc_set_mod_clk(priv, 24000000);
+	ret = mmc_set_mod_clk(priv, false, 24000000);
 	if (ret)
 		return NULL;
 
@@ -816,6 +867,9 @@ static int sunxi_mmc_probe(struct udevice *dev)
 	priv->mclkreg = (void *)ccu_reg +
 			(priv->variant->mclk_offset + (priv->mmc_no * 4));
 
+	if (priv->mmc_no == 2)
+		cfg->host_caps |= MMC_MODE_DDR_52MHz;
+
 	ret = clk_get_by_name(dev, "ahb", &gate_clk);
 	if (!ret)
 		clk_enable(&gate_clk);
@@ -824,7 +878,7 @@ static int sunxi_mmc_probe(struct udevice *dev)
 	if (!ret)
 		reset_deassert_bulk(&reset_bulk);
 
-	ret = mmc_set_mod_clk(priv, 24000000);
+	ret = mmc_set_mod_clk(priv, false, 24000000);
 	if (ret)
 		return ret;
 
