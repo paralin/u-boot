@@ -260,16 +260,20 @@ int board_init(void)
 		return ret;
 
 #ifdef CONFIG_SATAPWR
-	satapwr_pin = sunxi_name_to_gpio(CONFIG_SATAPWR);
-	gpio_request(satapwr_pin, "satapwr");
-	gpio_direction_output(satapwr_pin, 1);
-	/* Give attached sata device time to power-up to avoid link timeouts */
-	mdelay(500);
+	if (CONFIG_SATAPWR[0]) {
+		satapwr_pin = sunxi_name_to_gpio(CONFIG_SATAPWR);
+		gpio_request(satapwr_pin, "satapwr");
+		gpio_direction_output(satapwr_pin, 1);
+		/* Give attached sata device time to power-up to avoid link timeouts */
+		mdelay(500);
+	}
 #endif
 #ifdef CONFIG_MACPWR
-	macpwr_pin = sunxi_name_to_gpio(CONFIG_MACPWR);
-	gpio_request(macpwr_pin, "macpwr");
-	gpio_direction_output(macpwr_pin, 1);
+	if (CONFIG_MACPWR[0]) {
+		macpwr_pin = sunxi_name_to_gpio(CONFIG_MACPWR);
+		gpio_request(macpwr_pin, "macpwr");
+		gpio_direction_output(macpwr_pin, 1);
+	}
 #endif
 
 #ifdef CONFIG_DM_I2C
