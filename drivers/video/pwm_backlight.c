@@ -96,11 +96,11 @@ static int enable_sequence(struct udevice *dev, int seq)
 					  dev->name);
 				return log_ret(ret);
 			}
-			mdelay(120);
+//			mdelay(120);
 		}
 		break;
 	case 1:
-		mdelay(10);
+//		mdelay(10);
 		dm_gpio_set_value(&priv->enable, 1);
 		break;
 	}
