@@ -583,7 +583,12 @@ static int sunxi_mmc_send_cmd_common(struct sunxi_mmc_priv *priv,
 		bytecnt = data->blocksize * data->blocks;
 		debug("trans data %d bytes\n", bytecnt);
 
-		if (bytecnt > 64 && !IS_ENABLED(SPL_BUILD)) {
+		// DMA doesn't work when the target is SRAM for some reason.
+		int reading = !!(data->flags & MMC_DATA_READ);
+		uint8_t* buf = (uint8_t*)(reading ? data->dest : data->src);
+		bool is_dram = (uintptr_t)buf >= 0x4000000;
+
+		if (bytecnt > 64 && is_dram) {
 			debug("  using dma %d\n", bytecnt);
 			error = mmc_trans_data_by_dma(priv, mmc, data);
 			writel(cmdval | cmd->cmdidx, &priv->reg->cmd);
@@ -719,9 +724,18 @@ struct mmc *sunxi_mmc_init(int sdc_no)
 
 	cfg->host_caps |= MMC_MODE_HS_52MHz | MMC_MODE_HS;
 	cfg->b_max = CONFIG_SYS_MMC_MAX_BLK_COUNT;
+	if (sdc_no == 2)
+		cfg->host_caps |= MMC_MODE_DDR_52MHz;
 
 	cfg->f_min = 400000;
 	cfg->f_max = 52000000;
+
+	// enough descs for a realy big u-boot (4MiB)
+	priv->n_dma_descs = 4*1024*1024 / DMA_BUF_MAX_SIZE;
+	priv->dma_descs = malloc(sizeof(struct sunxi_idma_desc)
+				 * priv->n_dma_descs);
+	if (priv->dma_descs == NULL)
+		return NULL;
 
 	if (mmc_resource_init(sdc_no) != 0)
 		return NULL;
