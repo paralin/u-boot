@@ -124,7 +124,7 @@ static void painter_char(struct painter* p, char ch, u32 color)
 
 // menu command
 
-static int do_tmenu(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
+static int handle_tmenu(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[], int no_touch)
 {
 	struct udevice *vdev, *tdev;
 	struct video_priv *vpriv;
@@ -144,9 +144,11 @@ static int do_tmenu(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
 	if (ret)
 		return CMD_RET_FAILURE;
 
-	ret = uclass_first_device_err(UCLASS_TOUCHPANEL, &tdev);
-	if (ret)
-		return CMD_RET_FAILURE;
+	if (!no_touch) {
+		ret = uclass_first_device_err(UCLASS_TOUCHPANEL, &tdev);
+		if (ret)
+			return CMD_RET_FAILURE;
+	}
 
 	vpriv = dev_get_uclass_priv(vdev);
 
@@ -168,10 +170,12 @@ static int do_tmenu(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
 	int selected = -1;
 	int redraw = 1;
 
-	ret = touchpanel_start(tdev);
-	if (ret < 0) {
-		printf("Failed to start %s, err=%d\n", tdev->name, ret);
-		return CMD_RET_FAILURE;
+	if (!no_touch) {
+		ret = touchpanel_start(tdev);
+		if (ret < 0) {
+			printf("Failed to start %s, err=%d\n", tdev->name, ret);
+			return CMD_RET_FAILURE;
+		}
 	}
 
 next:
@@ -196,8 +200,11 @@ next:
 			redraw = 0;
 		}
 
+		if (no_touch)
+			return CMD_RET_SUCCESS;
+
 		// don't be too busy reading i2c
-		udelay(100 * 1000);
+		udelay(50 * 1000);
 
 		// handle input
 		ret = touchpanel_get_touches(tdev, touches, ARRAY_SIZE(touches));
@@ -248,4 +255,27 @@ next:
 	return CMD_RET_SUCCESS;
 }
 
-U_BOOT_CMD(tmenu, 8, 1, do_tmenu, "tmenu", "tmenu item1 [item2...] - show touch menu");
+static int do_tmenu_render(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
+{
+	return handle_tmenu(cmdtp, flag, argc, argv, 1);
+}
+
+static int do_tmenu_input(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
+{
+	return handle_tmenu(cmdtp, flag, argc, argv, 0);
+}
+
+static int do_tmenu(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
+{
+	int ret;
+	
+	ret = do_tmenu_render(cmdtp, flag, argc, argv);
+	if (ret == CMD_RET_SUCCESS)
+		ret = do_tmenu_input(cmdtp, flag, argc, argv);
+	
+	return ret;
+}
+
+U_BOOT_CMD(tmenu, 8, 1, do_tmenu, "tmenu", "tmenu item1 [item2...] - show touch menu and wait for input");
+U_BOOT_CMD(tmenu_render, 8, 1, do_tmenu_render, "tmenu_render", "tmenu_render item1 [item2...] - show touch menu");
+U_BOOT_CMD(tmenu_input, 8, 1, do_tmenu_input, "tmenu_input", "tmenu_input item1 [item2...] - wait for touch menu input");
