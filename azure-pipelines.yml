@@ -1,0 +1,46 @@
+trigger:
+  batch: false
+  branches:
+    include:
+      - master
+      - ci-*
+  tags:
+    include:
+      - v*-ci
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+container: sigmaris/aarch64-linux-crossbuilder:latest
+
+steps:
+- script: |
+    git clone https://github.com/ARM-software/arm-trusted-firmware.git
+    cd arm-trusted-firmware
+    git checkout v2.1
+    make realclean
+    make -j$(getconf _NPROCESSORS_ONLN) CROSS_COMPILE=aarch64-linux-gnu- PLAT=rk3399 bl31
+  displayName: Build arm-trusted-firmware bl31.elf for rk3399
+- script: |
+    export BL31="$(realpath arm-trusted-firmware/build/rk3399/release/bl31/bl31.elf)"
+    make rockpro64-rk3399_defconfig
+    make -j$(getconf _NPROCESSORS_ONLN) CROSS_COMPILE=aarch64-linux-gnu-
+    tools/mkimage -n rk3399 -T rksd -d tpl/u-boot-tpl-dtb.bin '$(Build.ArtifactStagingDirectory)/idbloader.img'
+    cat spl/u-boot-spl-dtb.bin >> '$(Build.ArtifactStagingDirectory)/idbloader.img'
+    cp u-boot.itb '$(Build.ArtifactStagingDirectory)'
+  displayName: Build idbloader.img and u-boot.itb
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: uboot
+- task: GithubRelease@0
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'), endsWith(variables['Build.SourceBranch'], '-ci'))
+  displayName: 'Create Github release with assets'
+  inputs:
+    gitHubConnection: sigmaris_token
+    repositoryName: sigmaris/u-boot
+    action: 'create'
+    target: '$(Build.SourceVersion)'
+    tagSource: 'auto'
+    title: 'rockpro64 u-boot $(Build.SourceBranchName)'
+    assets: '$(Build.ArtifactStagingDirectory)/*'
