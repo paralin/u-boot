@@ -473,8 +473,13 @@ static void mmc_pinmux_setup(int sdc)
 				sunxi_gpio_set_drv(pin, 2);
 			}
 		} else {
+#if CONFIG_MMC2_BUS_WIDTH == 4
+			/* SDC2: PC6-PC15 */
+			for (pin = SUNXI_GPC(6); pin <= SUNXI_GPC(11); pin++) {
+#else
 			/* SDC2: PC6-PC15 */
 			for (pin = SUNXI_GPC(6); pin <= SUNXI_GPC(15); pin++) {
+#endif
 				sunxi_gpio_set_cfgpin(pin, SUNXI_GPC_SDC2);
 				sunxi_gpio_set_pull(pin, SUNXI_GPIO_PULL_UP);
 				sunxi_gpio_set_drv(pin, 2);
