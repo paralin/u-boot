@@ -25,9 +25,7 @@ steps:
     export BL31="$(realpath arm-trusted-firmware/build/rk3399/release/bl31/bl31.elf)"
     make rockpro64-rk3399_defconfig
     make -j$(getconf _NPROCESSORS_ONLN) CROSS_COMPILE=aarch64-linux-gnu-
-    tools/mkimage -n rk3399 -T rksd -d tpl/u-boot-tpl-dtb.bin '$(Build.ArtifactStagingDirectory)/idbloader.img'
-    cat spl/u-boot-spl-dtb.bin >> '$(Build.ArtifactStagingDirectory)/idbloader.img'
-    cp u-boot.itb '$(Build.ArtifactStagingDirectory)'
+    cp idbloader.img u-boot.itb '$(Build.ArtifactStagingDirectory)'
   displayName: Build idbloader.img and u-boot.itb
 - task: PublishBuildArtifacts@1
   inputs:
