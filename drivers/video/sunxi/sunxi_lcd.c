@@ -68,11 +68,11 @@ static int sunxi_lcd_enable(struct udevice *dev, int bpp,
 	lcdc_tcon0_mode_set(lcdc, edid, clk_div, false,
 			    priv->panel_bpp, CONFIG_VIDEO_LCD_DCLK_PHASE);
 	lcdc_enable(lcdc, priv->panel_bpp);
-
+/*
 	ret = uclass_get_device(UCLASS_PANEL_BACKLIGHT, 0, &backlight);
 	if (!ret)
 		backlight_enable(backlight);
-
+*/
 	return 0;
 }
 
