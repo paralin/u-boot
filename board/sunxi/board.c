@@ -887,6 +887,34 @@ int misc_init_r(void)
 	return 0;
 }
 
+static void fixup_bd_address(void *blob)
+{
+#ifdef CONFIG_FIXUP_BDADDR
+	/* Some devices ship with a Bluetooth controller default address.
+	 * Set a valid address through the device tree.
+	 */
+	uchar tmp[ETH_ALEN], bdaddr[ETH_ALEN];
+	int i;
+
+	if (strlen(CONFIG_FIXUP_BDADDR) < 1)
+		return;
+
+	if (!eth_env_get_enetaddr("bdaddr", tmp)) {
+		if (!eth_env_get_enetaddr("ethaddr", tmp))
+			return;
+
+		tmp[ETH_ALEN - 1] ^= 1;
+	}
+
+	/* Addresses need to be in the binary format of the corresponding stack */
+	for (i = 0; i < ETH_ALEN; ++i)
+		bdaddr[i] = tmp[ETH_ALEN - i - 1];
+
+	do_fixup_by_compat(blob, CONFIG_FIXUP_BDADDR,
+			   "local-bd-address", bdaddr, ETH_ALEN, 1);
+#endif
+}
+
 int ft_board_setup(void *blob, bd_t *bd)
 {
 	int __maybe_unused r;
@@ -896,6 +924,8 @@ int ft_board_setup(void *blob, bd_t *bd)
 	 * ethernet aliases the u-boot copy does not have.
 	 */
 	setup_environment(blob);
+
+	fixup_bd_address(blob);
 
 #ifdef CONFIG_VIDEO_DT_SIMPLEFB
 	r = sunxi_simplefb_setup(blob);
