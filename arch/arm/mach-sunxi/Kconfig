@@ -1018,7 +1018,6 @@ config PINE64_DT_SELECTION
 
 config FIXUP_BDADDR
 	string "Fixup the Bluetooth controller address"
-	depends on MACH_SUN50I_H6
 	default ""
 	help
 	  This option specifies the DT compatible name of the Bluetooth
