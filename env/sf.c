@@ -174,7 +174,9 @@ static int env_sf_load(void)
 	ret = env_import_redund((char *)tmp_env1, read1_fail, (char *)tmp_env2,
 				read2_fail, H_EXTERNAL);
 
+#ifndef CONFIG_DM_SPI_FLASH
 	spi_flash_free(env_flash);
+#endif
 	env_flash = NULL;
 out:
 	free(tmp_env1);
@@ -270,7 +272,9 @@ static int env_sf_load(void)
 		gd->env_valid = ENV_VALID;
 
 err_read:
+#ifndef CONFIG_DM_SPI_FLASH
 	spi_flash_free(env_flash);
+#endif
 	env_flash = NULL;
 out:
 	free(buf);
