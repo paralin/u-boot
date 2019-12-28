@@ -21,7 +21,6 @@ steps:
     cd arm-trusted-firmware
     git checkout master
     git am ../atf-rk3399-baudrate.patch
-    git am ../switch-power-domains-on-before-reset.patch
     make realclean
     make -j$(getconf _NPROCESSORS_ONLN) CROSS_COMPILE=aarch64-linux-gnu- PLAT=rk3399 bl31
   displayName: Build arm-trusted-firmware bl31.elf for rk3399 with 1.5Mbps baudrate patch
