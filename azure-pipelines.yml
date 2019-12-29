@@ -70,13 +70,13 @@ jobs:
     displayName: Build u-boot
   - script: |
       set -e
-      padsize=393215
+      padsize=$((0x60000 - 1))
       img1size=$(wc -c <"$(img1name)")
       [ $img1size -le $padsize ] || exit 1
       dd if=/dev/zero of=$(img1name) conv=notrunc bs=1 count=1 seek=$padsize
       cat $(img1name) u-boot.itb > '$(Build.ArtifactStagingDirectory)/spi_combined.img'
       tools/mkimage -C none -A arm -T script -d scripts/flash_spi.cmd '$(Build.ArtifactStagingDirectory)/flash_spi.scr'
-    displayName: Create single SPI image with u-boot.itb at 0x60000 (393216)
+    displayName: Create single SPI image with u-boot.itb at 0x60000
     condition: eq(variables['img1type'], 'rkspi')
   - task: PublishBuildArtifacts@1
     displayName: 'Publish idbloader.img and u-boot.itb'

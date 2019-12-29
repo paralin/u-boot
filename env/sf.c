@@ -278,7 +278,9 @@ static int env_sf_load(void)
 		gd->env_valid = ENV_VALID;
 
 err_read:
+#ifndef CONFIG_DM_SPI_FLASH
 	spi_flash_free(env_flash);
+#endif
 	env_flash = NULL;
 out:
 	free(buf);
