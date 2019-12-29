@@ -1,5 +1,5 @@
-setenv blink_work 'led work on; sleep 0.1; led work off'
-setenv blink_diy 'led diy on; sleep 0.1; led diy off'
+setenv blink_work 'led work on; sleep 0.1; led work off; sleep 0.1'
+setenv blink_diy 'led diy on; sleep 0.1; led diy off; sleep 0.1'
 
 run blink_work
 sf probe
@@ -11,14 +11,15 @@ if size ${devtype} ${devnum}:${distro_bootpart} spi_combined.img; then
 
   # write flash
   run blink_work
-  sleep 0.1
   run blink_work
-  sleep 0.1
   run blink_work
-  sleep 0.1
   sf update ${kernel_addr_r} 0 ${filesize}
+  run blink_work
+  run blink_work
+  run blink_work
 
   led work on
+  echo "Wrote U-Boot to SPI Flash successfully."
   while true; do sleep 1; done
 else
   echo "missing spi_combined.img"
