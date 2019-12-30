@@ -27,7 +27,7 @@ if sf probe; then
     while true; do run blink_diy; sleep 0.1; done
   fi
 else
-  echo "Error: Couldn't probe SPI flash."
+  echo "Error: No SPI flash."
   # blink both LEDs forever
   while true; do run blink_diy; run blink_work; done
 fi
