@@ -1,4 +1,3 @@
-
 #include <common.h>
 #include <dm.h>
 #include <pci.h>
@@ -315,9 +314,9 @@ static int pcie_rockchip_addr_valid(pci_dev_t d, int first_busno)
     return 1;
 }
 
-static int rockchip_pcie_rd_own_conf(void *priv, int where, int size, u32 *val)
+static int rockchip_pcie_rd_own_conf(struct pcie_rockchip *rockchip, int where,
+	                                 int size, ulong *val)
 {
-    struct pcie_rockchip *rockchip = (struct pcie_rockchip *)priv;
     u64 addr = rockchip->apb_base + PCIE_RC_CONFIG_BASE + where;
 
 	if (size == 4) {
@@ -334,9 +333,9 @@ static int rockchip_pcie_rd_own_conf(void *priv, int where, int size, u32 *val)
     return 0;
 }
 
-static int rockchip_pcie_wr_own_conf(void *priv, int where, int size, u32 val)
+static int rockchip_pcie_wr_own_conf(struct pcie_rockchip *rockchip, int where,
+                                     int size, ulong val)
 {
-    struct pcie_rockchip *rockchip = (struct pcie_rockchip *)priv;
     u32 mask, tmp, offset;
 
     offset = where & ~0x3;
@@ -359,11 +358,10 @@ static int rockchip_pcie_wr_own_conf(void *priv, int where, int size, u32 val)
     return 0;
 }
 
-static int rockchip_pcie_rd_other_conf(void *priv, int where,
-                                       int size, u32 *val)
+static int rockchip_pcie_rd_other_conf(struct pcie_rockchip *rockchip, int where,
+                                       int size, ulong *val)
 {
     u32 busdev;
-    struct pcie_rockchip *rockchip = (struct pcie_rockchip *)priv;
 
     /*
      * BDF = 01:00:00
@@ -384,9 +382,9 @@ static int rockchip_pcie_rd_other_conf(void *priv, int where,
     return 0;
 }
 
-static int rockchip_pcie_wr_other_conf(void *priv, int where, int size, u32 val)
+static int rockchip_pcie_wr_other_conf(struct pcie_rockchip *rockchip, int where,
+	                                   int size, ulong val)
 {
-    struct pcie_rockchip *rockchip = (struct pcie_rockchip *)priv;
     u32 busdev;
 
     /*
@@ -432,11 +430,11 @@ static int pcie_rockchip_read_config(struct udevice *bus, pci_dev_t bdf,
     }
 
     if(PCI_BUS(bdf) == pcie->first_busno) {
-        ret = rockchip_pcie_rd_own_conf(pcie, offset, size1,(u32 *)valuep);
+        ret = rockchip_pcie_rd_own_conf(pcie, offset, size1, valuep);
         if(ret < 0)
             return ret;
 	} else {
-        ret = rockchip_pcie_rd_other_conf(pcie, offset, size1, (u32 *)valuep);
+        ret = rockchip_pcie_rd_other_conf(pcie, offset, size1, valuep);
         if(ret < 0)
 			return ret;
 	}
@@ -476,6 +474,7 @@ static int pcie_rockchip_write_config(struct udevice *bus, pci_dev_t bdf,
 	}
 	return 0;
 }
+
 static u32 rockchip_pcie_read(struct pcie_rockchip *rockchip, u32 reg)
 {
 	return readl(rockchip->apb_base + reg);
@@ -486,48 +485,46 @@ static void rockchip_pcie_write(struct pcie_rockchip *rockchip, u32 val, u32 reg
 	writel(val, rockchip->apb_base + reg);
 }
 
-
 static int config_link(struct udevice *dev)
 {
 	struct pcie_rockchip *rockchip = dev_get_priv(dev);
-	u32	value,timeout, i;
-	u32 pointer, next_pointer;
+	ulong value, pointer, next_pointer;
+	u32 timeout, i;
 	u32 table_size;
 	u64 msix_table_addr = 0x0;
 	bool is_msi = false, is_msix = false;
-	u32 cmd;
 
-	rockchip_pcie_rd_other_conf((void *)rockchip, PCI_CLASS_REVISION, 4, &value);
+	rockchip_pcie_rd_other_conf(rockchip, PCI_CLASS_REVISION, 4, &value);
 	if ((value & (0xffff << 16)) !=
         (PCI_CLASS_MSC | PCI_SUBCLASS_NVME)) {
-        debug("PCIe: device's classe code & revision ID = 0x%x\n",
+        debug("PCIe: device's class code & revision ID = 0x%lx\n",
                value);
         debug("PCIe: We only support NVMe\n");
         return -EINVAL;
     }
 
-    rockchip_pcie_rd_other_conf((void *)rockchip, PCI_VENDOR_ID, 2, &value);
-    rockchip_pcie_rd_other_conf((void *)rockchip, PCI_DEVICE_ID, 2, &value);
+    rockchip_pcie_rd_other_conf(rockchip, PCI_VENDOR_ID, 2, &value);
+    rockchip_pcie_rd_other_conf(rockchip, PCI_DEVICE_ID, 2, &value);
 
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_PRIMARY_BUS, 4, 0x0);
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_BRIDGE_CONTROL, 2, 0x0);
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_COMMAND + 0x2, 2, 0xffff);
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_PRIMARY_BUS, 4, 0xff0100);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_PRIMARY_BUS, 4, 0x0);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_BRIDGE_CONTROL, 2, 0x0);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_COMMAND + 0x2, 2, 0xffff);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_PRIMARY_BUS, 4, 0xff0100);
     /* only support 64bit non-prefetchable 16k mem region: BAR0 + BAR1
      * clear BAR1 for upper 32bit, no need to wr all 1s to see the size
      */
-    rockchip_pcie_wr_other_conf((void *)rockchip, PCI_BASE_ADDRESS_1, 4, 0x0);
+    rockchip_pcie_wr_other_conf(rockchip, PCI_BASE_ADDRESS_1, 4, 0x0);
 
     /* clear CCC and enable retrain link */
-    rockchip_pcie_rd_own_conf((void *)rockchip, PCI_LNKCTL, 2, &value);
+    rockchip_pcie_rd_own_conf(rockchip, PCI_LNKCTL, 2, &value);
     value &= ~PCI_EXP_LNKCTL_CCC;
     value |= PCI_EXP_LNKCTL_RL;
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_LNKCTL, 2, value);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_LNKCTL, 2, value);
 
     /* wait for clear of LTS */
     timeout = 2000;
     while (timeout--) {
-        rockchip_pcie_rd_own_conf((void *)rockchip, PCI_LNKCTL + 0x2, 2, &value);
+        rockchip_pcie_rd_own_conf(rockchip, PCI_LNKCTL + 0x2, 2, &value);
         if (!(value & BIT(11)))
             break;
         mdelay(1);
@@ -538,56 +535,56 @@ static int config_link(struct udevice *dev)
     }
 
     /* write SBN */
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_SUBORDINATE_BUS, 1, 0x1);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_SUBORDINATE_BUS, 1, 0x1);
     /* clear some enable bits for error */
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_BRIDGE_CONTROL, 2, 0x0);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_BRIDGE_CONTROL, 2, 0x0);
     /* write EP's command register, disable EP */
-    rockchip_pcie_wr_other_conf((void *)rockchip, PCI_COMMAND, 2, 0x0);
+    rockchip_pcie_wr_other_conf(rockchip, PCI_COMMAND, 2, 0x0);
 
 	for (i = 0; i < rockchip->bus.region_count; i++) {
         if (rockchip->bus.regions[i].flags == PCI_REGION_MEM) {
             /* configre BAR0 */
-			rockchip_pcie_wr_other_conf((void *)rockchip, PCI_BASE_ADDRESS_0, 4,
+			rockchip_pcie_wr_other_conf(rockchip, PCI_BASE_ADDRESS_0, 4,
                                         rockchip->bus.regions[i].bus_start);
             /* configre BAR1 */
-            rockchip_pcie_wr_other_conf((void *)rockchip, PCI_BASE_ADDRESS_1,
+            rockchip_pcie_wr_other_conf(rockchip, PCI_BASE_ADDRESS_1,
                                   4, 0x0);
             break;
         }
     }
 
 	/* write EP's command register */
-    rockchip_pcie_wr_other_conf((void *)rockchip, PCI_COMMAND, 2, 0x0);
+    rockchip_pcie_wr_other_conf(rockchip, PCI_COMMAND, 2, 0x0);
 
     /* write RC's IO base and limit including upper */
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_IO_BASE_UPPER16, 4, 0xffff);
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_IO_BASE, 2, 0xf0);
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_IO_BASE_UPPER16, 4, 0x0);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_IO_BASE_UPPER16, 4, 0xffff);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_IO_BASE, 2, 0xf0);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_IO_BASE_UPPER16, 4, 0x0);
     /* write RC's Mem base and limit including upper */
     value = (rockchip->bus.regions[i].bus_start) >> 16;
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_MEMORY_BASE, 4,
+    rockchip_pcie_wr_own_conf(rockchip, PCI_MEMORY_BASE, 4,
                           value | (value << 16));
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_PREF_LIMIT_UPPER32, 4, 0x0);
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_PREF_MEMORY_BASE, 4, 0xfff0);
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_PREF_BASE_UPPER32, 4, 0x0);
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_PREF_LIMIT_UPPER32, 4, 0x0);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_PREF_LIMIT_UPPER32, 4, 0x0);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_PREF_MEMORY_BASE, 4, 0xfff0);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_PREF_BASE_UPPER32, 4, 0x0);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_PREF_LIMIT_UPPER32, 4, 0x0);
     /* clear some enable bits for error */
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_BRIDGE_CONTROL, 2, 0x0);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_BRIDGE_CONTROL, 2, 0x0);
 
     /* read RC root control and cap, clear some int enable */
-    rockchip_pcie_wr_own_conf((void *)rockchip, PCI_RC_CTRL_CAP, 2, 0x0);
+    rockchip_pcie_wr_own_conf(rockchip, PCI_RC_CTRL_CAP, 2, 0x0);
 
     /* clear RC's error status, correctable and uncorectable error */
-    rockchip_pcie_wr_own_conf((void *)rockchip, 0x130, 4, 0x0);
-    rockchip_pcie_wr_own_conf((void *)rockchip, 0x110, 4, 0x0);
-    rockchip_pcie_wr_own_conf((void *)rockchip, 0x104, 4, 0x0);
+    rockchip_pcie_wr_own_conf(rockchip, 0x130, 4, 0x0);
+    rockchip_pcie_wr_own_conf(rockchip, 0x110, 4, 0x0);
+    rockchip_pcie_wr_own_conf(rockchip, 0x104, 4, 0x0);
 
     value = 0;
-    rockchip_pcie_rd_other_conf((void *)rockchip, 0x34, 1, &pointer);
-    debug("PCIe: cap pointer = 0x%x\n", pointer);
+    rockchip_pcie_rd_other_conf(rockchip, 0x34, 1, &pointer);
+    debug("PCIe: cap pointer = 0x%lx\n", pointer);
 
     for (;;) {
-        rockchip_pcie_rd_other_conf((void *)rockchip, pointer, 2, &next_pointer);
+        rockchip_pcie_rd_other_conf(rockchip, pointer, 2, &next_pointer);
         if ((next_pointer & 0xff) == PCI_CAP_ID_MSI) {
             is_msi = true;
             break;
@@ -601,21 +598,21 @@ static int config_link(struct udevice *dev)
             break;
     }
     if (is_msi) {
-        debug("PCIe: msi cap pointer = 0x%x\n", pointer);
-        rockchip_pcie_rd_other_conf((void *)rockchip, pointer + 2, 2, &value);
+        debug("PCIe: msi cap pointer = 0x%lx\n", pointer);
+        rockchip_pcie_rd_other_conf(rockchip, pointer + 2, 2, &value);
         value |= 0x1;
-        rockchip_pcie_wr_other_conf((void *)rockchip, pointer + 2, 2, value);
-        rockchip_pcie_wr_other_conf((void *)rockchip, pointer + 4, 4,
+        rockchip_pcie_wr_other_conf(rockchip, pointer + 2, 2, value);
+        rockchip_pcie_wr_other_conf(rockchip, pointer + 4, 4,
                               rockchip->bus.msi_base);
-        rockchip_pcie_wr_other_conf((void *)rockchip, pointer + 8, 4, 0x0);
+        rockchip_pcie_wr_other_conf(rockchip, pointer + 8, 4, 0x0);
     } else if (is_msix) {
-        debug("PCIe: msi-x cap pointer = 0x%x\n", pointer);
-        rockchip_pcie_rd_other_conf((void *)rockchip, pointer + 2, 2, &value);
-        debug("PCIe: msi-x table size = %d\n", value & 0x7ff);
+        debug("PCIe: msi-x cap pointer = 0x%lx\n", pointer);
+        rockchip_pcie_rd_other_conf(rockchip, pointer + 2, 2, &value);
+        debug("PCIe: msi-x table size = 0x%lx\n", value & 0x7ff);
         table_size = value & 0x7ff;
-        rockchip_pcie_rd_other_conf((void *)rockchip, pointer + 8, 2, &value);
-        debug("PCIe: msi-x BIR = 0x%x\n", value & 0x7);
-        debug("PCIe: msi-x table offset = 0x%x\n", value & 0xfffffff8);
+        rockchip_pcie_rd_other_conf(rockchip, pointer + 8, 2, &value);
+        debug("PCIe: msi-x BIR = 0x%lx\n", value & 0x7);
+        debug("PCIe: msi-x table offset = 0x%lx\n", value & 0xfffffff8);
 
         for (i = 0; i < rockchip->bus.region_count; i++) {
             if (rockchip->bus.regions[i].flags == PCI_REGION_MEM)
@@ -634,20 +631,20 @@ static int config_link(struct udevice *dev)
             writel(i,		msix_table_addr + i * 0x8);
             writel(0x0,		msix_table_addr + i * 0xc);
         }
-        rockchip_pcie_wr_other_conf((void *)rockchip, pointer + 2, 2, 0x20);
-        rockchip_pcie_wr_other_conf((void *)rockchip, pointer + 2, 2, 0xc020);
-        rockchip_pcie_wr_other_conf((void *)rockchip, pointer + 2, 2, 0x8020);
+        rockchip_pcie_wr_other_conf(rockchip, pointer + 2, 2, 0x20);
+        rockchip_pcie_wr_other_conf(rockchip, pointer + 2, 2, 0xc020);
+        rockchip_pcie_wr_other_conf(rockchip, pointer + 2, 2, 0x8020);
     } else {
         debug("PCIe: no msi and msi-x\n");
     }
 
-	rockchip_pcie_rd_other_conf((void *)rockchip, PCI_COMMAND, 2, &value);
+	rockchip_pcie_rd_other_conf(rockchip, PCI_COMMAND, 2, &value);
 	value |= PCI_COMMAND_INTX_DISABLE;
-	rockchip_pcie_wr_other_conf((void *)rockchip, PCI_COMMAND, 2, value);
+	rockchip_pcie_wr_other_conf(rockchip, PCI_COMMAND, 2, value);
 
-	rockchip_pcie_rd_other_conf((void *)rockchip, PCI_COMMAND, 2, &cmd);
-	cmd = (cmd | PCI_COMMAND_MEMORY | PCI_COMMAND_MASTER);
-	rockchip_pcie_wr_other_conf((void *)rockchip, PCI_COMMAND, 2, cmd);
+	rockchip_pcie_rd_other_conf(rockchip, PCI_COMMAND, 2, &value);
+	value |= (PCI_COMMAND_MEMORY | PCI_COMMAND_MASTER);
+	rockchip_pcie_wr_other_conf(rockchip, PCI_COMMAND, 2, value);
 
 	return 0;
 }
@@ -787,7 +784,7 @@ static int rockchip_pcie_init_port(struct pcie_rockchip *rockchip)
 	if (!fixed_resource) {
 		dm_gpio_set_value(&rockchip->rst_gpio, 1);
 	} else {
-		#ifdef CONFIG_RKCHIP_RK3399
+		#ifdef CONFIG_ROCKCHIP_RK3399
 		/* GPIO4 D3 output high level */
 		debug("pcie_cdns: warning: double check your reset io\n");
 		reg = readl(0xff790000);
@@ -1028,7 +1025,7 @@ static int pcie_rockchip_ofdata_to_platdata(struct udevice *dev)
 	}
 do_fixed:
 	if(fixed_resource) {
-	#ifdef CONFIG_RKCHIP_RK3399
+	#ifdef CONFIG_ROCKCHIP_RK3399
 		rockchip->axi_base = 0xf8000000;
 		rockchip->apb_base = 0xfd000000;
 		rockchip->axi_size = 0x2000000;
@@ -1043,7 +1040,7 @@ do_fixed:
 	}
 
 	if(fixed_resource) {
-		#ifdef CONFIG_RKCHIP_RK3399
+		#ifdef CONFIG_ROCKCHIP_RK3399
 
 		rockchip->phy.reg_base = RKIO_GRF_PHYS;
 		rockchip->phy.rst_addr = RKIO_CRU_PHYS + 0x420;
@@ -1092,7 +1089,7 @@ do_fixed:
 	return 0;
 
 fixed_rst:
-	#ifdef CONFIG_RKCHIP_RK3399
+	#ifdef CONFIG_ROCKCHIP_RK3399
 	/* set GPIO4 D3 as output low now*/
 	debug("pcie: warning: double check your PCIe reset gpio!\n");
 	writel((0x3 << 30) | (0x0 << 14), RKIO_GRF_PHYS + 0xe010);

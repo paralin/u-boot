@@ -8,19 +8,11 @@
 #ifndef __PCIE_H
 #define __PCIE_H
 
-//#include "../config.h"
 #include <pci.h>
 #include <common.h>
 #include <asm/io.h>
-//#include <asm/arch/rkplat.h>
 #include <dm.h>
-#ifndef CONFIG_RKCHIP_RK3399
-#define CONFIG_RKCHIP_RK3399
-#endif
-//#include <part_efi.h>
-#define CONFIG_RK_LCD_SIZE SZ_32M
 
-//#define BIT(x)				(1 << (x))
 /* Capability lists */
 #define PCI_CAP_LIST_ID		0	/* Capability ID */
 #define  PCI_CAP_ID_PM		0x01	/* Power Management */
