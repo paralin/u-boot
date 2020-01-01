@@ -5,6 +5,9 @@
 
 #include <common.h>
 #include <dm.h>
+#include <fdt_support.h>
+#include <jffs2/load_kernel.h>
+#include <mtd_node.h>
 #include <syscon.h>
 #include <asm/io.h>
 #include <asm/arch-rockchip/clock.h>
@@ -14,6 +17,21 @@
 
 #define GRF_IO_VSEL_BT565_SHIFT 0
 #define PMUGRF_CON0_VSEL_SHIFT 8
+
+#ifdef CONFIG_OF_BOARD_SETUP
+int ft_board_setup(void *blob, bd_t *bd)
+{
+#ifdef CONFIG_FDT_FIXUP_PARTITIONS
+	static const struct node_info nodes[] = {
+		{ "jedec,spi-nor",	MTD_DEV_TYPE_NOR,	},
+	};
+
+	fdt_shrink_to_minimum(blob, 0); /* Make room for new properties */
+	fdt_fixup_mtdparts(blob, nodes, ARRAY_SIZE(nodes));
+#endif
+	return 0;
+}
+#endif
 
 #ifdef CONFIG_MISC_INIT_R
 static void setup_iodomain(void)
