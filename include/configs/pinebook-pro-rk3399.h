@@ -8,6 +8,8 @@
 #define __PINEBOOK_PRO_RK3399_H
 
 #define ROCKCHIP_DEVICE_SETTINGS \
+		"beep_boop=led green:power on; led red:standby on; sleep 0.1; led green:power off; sleep 0.1; led green:power on; sleep 0.1; led red:standby off; sleep 0.1; led red:standby on\0" \
+		"bootcmd=run beep_boop; run distro_bootcmd\0" \
 		"stdin=serial,usbkbd\0" \
 		"stdout=serial,vidconsole\0" \
 		"stderr=serial,vidconsole\0"
