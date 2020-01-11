@@ -97,6 +97,7 @@ jobs:
       dd if=/dev/zero of=$(img1name) conv=notrunc bs=1 count=1 seek=$padsize
       cat $(img1name) u-boot.itb > '$(Build.ArtifactStagingDirectory)/spi_combined.img'
       tools/mkimage -C none -A arm -T script -d scripts/flash_spi.cmd '$(Build.ArtifactStagingDirectory)/flash_spi.scr'
+      tools/mkimage -C none -A arm -T script -d scripts/erase_spi.cmd '$(Build.ArtifactStagingDirectory)/erase_spi.scr'
     displayName: Create single SPI image with u-boot.itb at 0x60000
     condition: eq(variables['img1type'], 'rkspi')
   - task: PublishBuildArtifacts@1
@@ -111,6 +112,13 @@ jobs:
   pool:
     vmImage: 'ubuntu-18.04'
   container: sigmaris/aarch64-linux-crossbuilder:latest
+  strategy:
+    maxParallel: 2
+    matrix:
+      flash:
+        script_name: flash_spi
+      erase:
+        script_name: erase_spi
   steps:
   - checkout: none  #skip checking out the default repository resource
   - task: DownloadBuildArtifacts@0
@@ -125,27 +133,27 @@ jobs:
       downloadPath: '$(System.DefaultWorkingDirectory)'
   - script: |
         set -e
-        cp '$(System.DefaultWorkingDirectory)/spi_u-boot/flash_spi.scr' boot.scr
+        cp '$(System.DefaultWorkingDirectory)/spi_u-boot/$(script_name).scr' boot.scr
         cp '$(System.DefaultWorkingDirectory)/spi_u-boot/spi_combined.img' spi_combined.img
         dd if=/dev/zero of=boot.tmp bs=1M count=16
         mkfs.vfat -n u-boot-script boot.tmp
         mcopy -sm -i boot.tmp boot.scr ::
         mcopy -sm -i boot.tmp spi_combined.img ::
-        dd if=/dev/zero of=flash_spi.img bs=1M count=32
-        parted -s flash_spi.img mklabel gpt
-        parted -s flash_spi.img unit s mkpart loader1 64 8063
-        parted -s flash_spi.img unit s mkpart loader2 16384 24575
-        parted -s flash_spi.img unit s mkpart boot fat16 24576 100%
-        parted -s flash_spi.img set 3 legacy_boot on
-        dd if='$(System.DefaultWorkingDirectory)/mmc_u-boot/mmc_idbloader.img' of=flash_spi.img conv=notrunc seek=64
-        dd if='$(System.DefaultWorkingDirectory)/mmc_u-boot/mmc_u-boot.itb' of=flash_spi.img conv=notrunc seek=16384
-        dd if=boot.tmp of=flash_spi.img conv=notrunc seek=24576
-        gzip flash_spi.img
-    displayName: Create SD card image to flash u-boot to SPI
+        dd if=/dev/zero of=$(script_name).img bs=1M count=32
+        parted -s $(script_name).img mklabel gpt
+        parted -s $(script_name).img unit s mkpart loader1 64 8063
+        parted -s $(script_name).img unit s mkpart loader2 16384 24575
+        parted -s $(script_name).img unit s mkpart boot fat16 24576 100%
+        parted -s $(script_name).img set 3 legacy_boot on
+        dd if='$(System.DefaultWorkingDirectory)/mmc_u-boot/mmc_idbloader.img' of=$(script_name).img conv=notrunc seek=64
+        dd if='$(System.DefaultWorkingDirectory)/mmc_u-boot/mmc_u-boot.itb' of=$(script_name).img conv=notrunc seek=16384
+        dd if=boot.tmp of=$(script_name).img conv=notrunc seek=24576
+        gzip $(script_name).img
+    displayName: Create SD card images to flash u-boot to SPI or erase SPI flash
   - task: PublishBuildArtifacts@1
-    displayName: Publish SD card image to flash u-boot to SPI
+    displayName: Publish SD card image to flash u-boot to SPI or erase SPI flash
     inputs:
-      pathToPublish: flash_spi.img.gz
+      pathToPublish: '$(script_name).img.gz'
       artifactName: spi_u-boot
 - job: github_release
   dependsOn:
