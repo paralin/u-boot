@@ -20,6 +20,8 @@
 #include <asm/arch-rockchip/hardware.h>
 #include <linux/bitops.h>
 #include <power/regulator.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/rockchip.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -120,8 +122,8 @@ void board_debug_uart_init(void)
 	struct rk3399_grf_regs * const grf = (void *)GRF_BASE;
 #ifdef CONFIG_TARGET_CHROMEBOOK_BOB
 	struct rk3399_pmugrf_regs * const pmugrf = (void *)PMUGRF_BASE;
-	struct rockchip_gpio_regs * const gpio = (void *)GPIO0_BASE;
 #endif
+	struct rockchip_gpio_regs * const gpio = (void *)GPIO0_BASE;
 
 #if defined(CONFIG_DEBUG_UART_BASE) && (CONFIG_DEBUG_UART_BASE == 0xff180000)
 	/* Enable early UART0 on the RK3399 */
@@ -153,6 +155,14 @@ void board_debug_uart_init(void)
 	spl_gpio_output(gpio, GPIO(BANK_B, 4), 1);  /* PP3000_EN */
 	spl_gpio_set_pull(&pmugrf->gpio0_p, GPIO(BANK_B, 4), GPIO_PULL_NORMAL);
 #endif /* CONFIG_TARGET_CHROMEBOOK_BOB */
+
+	{
+		// set GPIO0_A2/B3 to GPIO_ACTIVE_HIGH
+		// set GPIO0_A2/B3 to OUTPUT
+		int mask = (1UL << RK_PA2) | (1UL << RK_PB3);
+		setbits_le32(&gpio->swport_dr, mask);
+		setbits_le32(&gpio->swport_ddr, mask);
+	}
 
 	/* Enable early UART2 channel C on the RK3399 */
 	rk_clrsetreg(&grf->gpio4c_iomux,
