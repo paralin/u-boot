@@ -309,10 +309,14 @@ static int mmc_update_clk(struct sunxi_mmc_priv *priv)
 	return 0;
 }
 
+#define SDXC_MASK_DATA0			BIT(31)
+
+
 static int mmc_config_clock(struct sunxi_mmc_priv *priv, struct mmc *mmc)
 {
 	/* Disable Clock */
 	clrbits_le32(&priv->reg->clkcr, SUNXI_MMC_CLK_ENABLE);
+	setbits_le32(&priv->reg->clkcr, SDXC_MASK_DATA0);
 
 	if (mmc_update_clk(priv))
 		return -1;
@@ -333,6 +337,7 @@ static int mmc_config_clock(struct sunxi_mmc_priv *priv, struct mmc *mmc)
 
 	/* Re-enable Clock */
 	setbits_le32(&priv->reg->clkcr, SUNXI_MMC_CLK_ENABLE);
+	clrbits_le32(&priv->reg->clkcr, SDXC_MASK_DATA0);
 
 	if (mmc_update_clk(priv))
 		return -1;
