@@ -9,6 +9,7 @@
 #include <common.h>
 #include <bloblist.h>
 #include <binman_sym.h>
+#include <cpu_func.h>
 #include <dm.h>
 #include <handoff.h>
 #include <hang.h>
@@ -611,6 +612,35 @@ void board_init_f(ulong dummy)
 }
 #endif
 
+#if !(defined(CONFIG_SYS_ICACHE_OFF) && defined(CONFIG_SYS_DCACHE_OFF)) && \
+		defined(CONFIG_ARM)
+int reserve_mmu(void)
+{
+	phys_addr_t ram_top = 0;
+	/* reserve TLB table */
+	gd->arch.tlb_size = PGTABLE_SIZE;
+
+#ifdef CONFIG_SYS_SDRAM_BASE
+	ram_top = CONFIG_SYS_SDRAM_BASE;
+#endif
+	ram_top += get_effective_memsize();
+	gd->arch.tlb_addr = ram_top - gd->arch.tlb_size;
+	debug("TLB table from %08lx to %08lx\n", gd->arch.tlb_addr,
+	      gd->arch.tlb_addr + gd->arch.tlb_size);
+	return 0;
+}
+
+__weak int dram_init_banksize(void)
+{
+#if defined(CONFIG_NR_DRAM_BANKS) && defined(CONFIG_SYS_SDRAM_BASE)
+	gd->bd->bi_dram[0].start = CONFIG_SYS_SDRAM_BASE;
+	gd->bd->bi_dram[0].size = get_effective_memsize();
+#endif
+	return 0;
+}
+
+#endif
+
 void board_init_r(gd_t *dummy1, ulong dummy2)
 {
 	u32 spl_boot_list[] = {
@@ -627,6 +657,13 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 
 	spl_set_bd();
 
+#if !(defined(CONFIG_SYS_ICACHE_OFF) && defined(CONFIG_SYS_DCACHE_OFF)) && \
+		defined(CONFIG_ARM)
+	dram_init_banksize();
+	reserve_mmu();
+	enable_caches();
+#endif
+
 #if defined(CONFIG_SYS_SPL_MALLOC_START)
 	mem_malloc_init(CONFIG_SYS_SPL_MALLOC_START,
 			CONFIG_SYS_SPL_MALLOC_SIZE);
@@ -636,6 +673,7 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 		if (spl_init())
 			hang();
 	}
+
 #if !defined(CONFIG_PPC) && !defined(CONFIG_ARCH_MX6)
 	/*
 	 * timer_init() does not exist on PPC systems. The timer is initialized
@@ -701,6 +739,11 @@ void board_init_r(gd_t *dummy1, ulong dummy2)
 			printf("Warning: Failed to finish bloblist (ret=%d)\n",
 			       ret);
 	}
+
+#if !(defined(CONFIG_SYS_ICACHE_OFF) && defined(CONFIG_SYS_DCACHE_OFF)) && \
+		defined(CONFIG_ARM)
+	cleanup_before_linux();
+#endif
 
 #ifdef CONFIG_CPU_V7M
 	spl_image.entry_point |= 0x1;
