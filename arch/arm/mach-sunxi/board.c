@@ -305,7 +305,9 @@ u32 spl_boot_device(void)
 void board_init_f(ulong dummy)
 {
 	spl_init();
-	preloader_console_init();
+
+	if (CONFIG_IS_ENABLED(SERIAL_SUPPORT))
+		preloader_console_init();
 
 #ifdef CONFIG_SPL_I2C_SUPPORT
 	/* Needed early by sunxi_board_init if PMU is enabled */
