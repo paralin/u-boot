@@ -31,7 +31,7 @@
 #define DMA_CONFIG_ERROR BIT(30) // flag: out: error happened
 #define DMA_CONFIG_HOLD BIT(31) // flag: desc owned by IDMAC (set to 1)
 
-#if defined(CONFIG_MACH_SUN50I)
+#if defined(CONFIG_MACH_SUN50I) || defined(CONFIG_MACH_SUN50I_H6)
 // mmc2 on A64 only allows for 8k
 #define DMA_BUF_MAX_SIZE (1 << 13)
 #else
