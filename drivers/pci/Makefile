@@ -37,6 +37,7 @@ obj-$(CONFIG_PCIE_LAYERSCAPE) += pcie_layerscape.o
 obj-$(CONFIG_PCIE_LAYERSCAPE) += pcie_layerscape_fixup.o
 obj-$(CONFIG_PCIE_LAYERSCAPE_GEN4) += pcie_layerscape_gen4.o \
 				pcie_layerscape_gen4_fixup.o
+obj-$(CONFIG_PCIE_ROCKCHIP) += pcie_rockchip.o
 obj-$(CONFIG_PCI_XILINX) += pcie_xilinx.o
 obj-$(CONFIG_PCI_PHYTIUM) += pcie_phytium.o
 obj-$(CONFIG_PCIE_INTEL_FPGA) += pcie_intel_fpga.o
