@@ -1,0 +1,10 @@
+While this u-boot branch contains seemingly generic code, and the code may work
+in general, it was made for and *tested only* on:
+
+- Orange Pi One
+- Orange Pi PC
+- Orange Pi PC2
+- Orange Pi 3
+- TBS A711
+- PinePhone
+- PocketBook Touch Lux 3
