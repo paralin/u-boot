@@ -59,6 +59,15 @@
 		regulator-always-on;
 	};
 
+	reg_gmac_2v5: gmac-2v5 {
+		compatible = "regulator-fixed";
+		regulator-name = "gmac-2v5";
+		regulator-min-microvolt = <2500000>;
+		regulator-max-microvolt = <2500000>;
+		enable-active-high;
+		gpio = <&pio 3 6 GPIO_ACTIVE_HIGH>; /* PD6 */
+	};
+
 	reg_vcc33_wifi: vcc33-wifi {
 		/* Always on 3.3V regulator for WiFi and BT */
 		compatible = "regulator-fixed";
@@ -79,28 +88,7 @@
 		vin-supply = <&reg_vcc33_wifi>;
 	};
 
-	/*
-	 * The board uses 2.5V RGMII signalling. Power sequence to enable
-	 * the phy is to enable GMAC-2V5 and GMAC-3V (aldo2) power rails
-	 * at the same time and to wait 100ms.
-	 */
-	reg_gmac_2v5: gmac-2v5 {
-		compatible = "regulator-fixed";
-		regulator-name = "gmac-2v5";
-		regulator-min-microvolt = <2500000>;
-		regulator-max-microvolt = <2500000>;
-		//startup-delay-us = <100000>;
-		enable-active-high;
-		gpio = <&pio 3 6 GPIO_ACTIVE_HIGH>; /* PD6 */
-
-		/* The real parent of gmac-2v5 is reg_vcc5v, but we need to
-		 * enable two regulators to power the phy. This is one way
-		 * to achieve that.
-		 */
-		//vin-supply = <&reg_aldo2>; /* GMAC-3V */
-	};
-
-	wifi_pwrseq: wifi_pwrseq {
+	wifi_pwrseq: wifi-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 		clocks = <&rtc 1>;
 		clock-names = "ext_clock";
@@ -129,15 +117,8 @@
 	status = "okay";
 };
 
-&emac {
-	pinctrl-names = "default";
-	pinctrl-0 = <&ext_rgmii_pins>;
-	phy-mode = "rgmii";
-	phy-handle = <&ext_rgmii_phy>;
-	phy-supply = <&reg_gmac_2v5>;
-	phy2-supply = <&reg_aldo2>;
-	allwinner,rx-delay-ps = <1500>;
-	allwinner,tx-delay-ps = <700>;
+&gpu {
+	mali-supply = <&reg_dcdcc>;
 	status = "okay";
 };
 
@@ -149,6 +130,24 @@
 	hdmi_out_con: endpoint {
 		remote-endpoint = <&hdmi_con_in>;
 	};
+};
+
+&emac {
+	pinctrl-names = "default";
+	pinctrl-0 = <&ext_rgmii_pins>;
+	phy-mode = "rgmii";
+	phy-handle = <&ext_rgmii_phy>;
+	/*
+	 * The board uses 2.5V RGMII signalling. Power sequence to enable
+	 * the phy is to enable GMAC-2V5 and GMAC-3V (aldo2) power rails
+	 * at the same time and to wait 100ms. The driver enables phy-io
+	 * first. Delay is achieved with enable-ramp-delay on reg_aldo2.
+	 */
+	phy-supply = <&reg_aldo2>;
+	phy-io-supply = <&reg_gmac_2v5>;
+	allwinner,rx-delay-ps = <1500>;
+	allwinner,tx-delay-ps = <700>;
+	status = "okay";
 };
 
 &mdio {
@@ -170,8 +169,6 @@
 };
 
 &mmc1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&mmc1_pins>;
 	vmmc-supply = <&reg_vcc33_wifi>;
 	vqmmc-supply = <&reg_vcc_wifi_io>;
 	mmc-pwrseq = <&wifi_pwrseq>;
@@ -234,6 +231,7 @@
 				regulator-min-microvolt = <3300000>;
 				regulator-max-microvolt = <3300000>;
 				regulator-name = "vcc33-audio-tv-ephy-mac";
+				regulator-enable-ramp-delay = <100000>;
 			};
 
 			/* ALDO3 is shorted to CLDO1 */
@@ -289,6 +287,7 @@
 			};
 
 			reg_dcdcc: dcdcc {
+				regulator-enable-ramp-delay = <32000>;
 				regulator-min-microvolt = <810000>;
 				regulator-max-microvolt = <1080000>;
 				regulator-name = "vdd-gpu";
@@ -357,6 +356,5 @@
 };
 
 &usb3phy {
-        phy-supply = <&reg_vcc5v>;
-        status = "okay";
+	status = "okay";
 };
