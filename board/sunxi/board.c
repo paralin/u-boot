@@ -44,6 +44,7 @@
 #include <spl.h>
 #include <sy8106a.h>
 #include <asm/setup.h>
+#include "lradc.h"
 
 #if defined CONFIG_VIDEO_LCD_PANEL_I2C && !(defined CONFIG_SPL_BUILD)
 /* So that we can use pin names in Kconfig and sunxi_name_to_gpio() */
@@ -627,6 +628,12 @@ void sunxi_board_init(void)
 {
 	int power_failed = 0;
 
+#ifdef CONFIG_MACH_SUN50I
+	// we init the lradc in SPL to get the ADC started early to have
+	// a valid sample when U-Boot main binary gets executed.
+	lradc_enable();
+#endif
+
 #ifdef CONFIG_PINEPHONE_LEDS
 	/* PD18:G PD19:R PD20:B */
 	gpio_request(SUNXI_GPD(18), "led:green");
@@ -909,6 +916,17 @@ int misc_init_r(void)
 	} else if (boot == BOOT_DEVICE_MMC2) {
 		env_set("mmc_bootdev", "1");
 	}
+
+#ifdef CONFIG_MACH_SUN50I
+	int key = lradc_get_pressed_key();
+	if (key == KEY_VOLUMEDOWN)
+		env_set("volume_key", "down");
+	else if (key == KEY_VOLUMEUP)
+		env_set("volume_key", "up");
+	
+	// no longer needed
+	lradc_disable();
+#endif
 
 	setup_environment(gd->fdt_blob);
 
