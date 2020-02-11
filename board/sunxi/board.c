@@ -48,6 +48,7 @@
 #include <spl.h>
 #include <sy8106a.h>
 #include <asm/setup.h>
+#include "lradc.h"
 #include <status_led.h>
 
 DECLARE_GLOBAL_DATA_PTR;
@@ -627,6 +628,12 @@ void sunxi_board_init(void)
 {
 	int power_failed = 0;
 
+#ifdef CONFIG_MACH_SUN50I
+	// we init the lradc in SPL to get the ADC started early to have
+	// a valid sample when U-Boot main binary gets executed.
+	lradc_enable();
+#endif
+
 #ifdef CONFIG_LED_STATUS
 	if (IS_ENABLED(CONFIG_SPL_DRIVERS_MISC))
 		status_led_init();
@@ -909,6 +916,17 @@ int misc_init_r(void)
 		snprintf(str, sizeof(str), "%s%s.dtb", prefix, spl_dt_name);
 		env_set("fdtfile", str);
 	}
+
+#ifdef CONFIG_MACH_SUN50I
+	int key = lradc_get_pressed_key();
+	if (key == KEY_VOLUMEDOWN)
+		env_set("volume_key", "down");
+	else if (key == KEY_VOLUMEUP)
+		env_set("volume_key", "up");
+
+	// no longer needed
+	lradc_disable();
+#endif
 
 	setup_environment(gd->fdt_blob);
 
