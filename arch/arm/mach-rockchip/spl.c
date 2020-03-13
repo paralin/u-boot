@@ -118,9 +118,6 @@ void board_init_f(ulong dummy)
 	debug_uart_init();
 	debug("\nspl:debug uart enabled in %s\n", __func__);
 #endif
-
-	board_early_init_f();
-
 	ret = spl_early_init();
 	if (ret) {
 		printf("spl_early_init() failed: %d\n", ret);
@@ -136,6 +133,7 @@ void board_init_f(ulong dummy)
 #endif
 #if !defined(CONFIG_TPL) || defined(CONFIG_SPL_OS_BOOT)
 	debug("\nspl:init dram\n");
+	board_early_init_f();
 	ret = uclass_get_device(UCLASS_RAM, 0, &dev);
 	if (ret) {
 		printf("DRAM init failed: %d\n", ret);
