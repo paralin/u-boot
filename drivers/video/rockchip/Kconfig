@@ -22,7 +22,7 @@ menuconfig VIDEO_ROCKCHIP
 config VIDEO_ROCKCHIP_MAX_XRES
         int "Maximum horizontal resolution (for memory allocation purposes)"
 	depends on VIDEO_ROCKCHIP
-	default 1920
+	default 3480
 	help
 	  The maximum horizontal resolution to support for the framebuffer.
 	  This configuration is used for reserving/allocating memory for the
@@ -31,7 +31,7 @@ config VIDEO_ROCKCHIP_MAX_XRES
 config VIDEO_ROCKCHIP_MAX_YRES
         int "Maximum vertical resolution (for memory allocation purposes)"
 	depends on VIDEO_ROCKCHIP
-	default 1080
+	default 2160
 	help
 	  The maximum vertical resolution to support for the framebuffer.
 	  This configuration is used for reserving/allocating memory for the
