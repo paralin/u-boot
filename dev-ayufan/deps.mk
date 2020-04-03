@@ -8,4 +8,4 @@ $(filter tmp/atf/%, $(BL31)):
 	git clone https://github.com/ARM-software/arm-trusted-firmware.git $$(dirname "$@")/$$(basename "$@" .elf)/src
 	git -C $$(dirname "$@")/$$(basename "$@" .elf)/src checkout $$(basename "$@" .elf)
 	make -C $$(dirname "$@")/$$(basename "$@" .elf)/src PLAT=$(BOARD_CHIP) CROSS_COMPILE="ccache aarch64-linux-gnu-" M0_CROSS_COMPILE="ccache arm-linux-gnueabi-" bl31
-	cp $$(dirname "$@")/$$(basename "$@" .elf)/src/build/rk3399/release/bl31/bl31.elf $@
+	cp $$(dirname "$@")/$$(basename "$@" .elf)/src/build/$(BOARD_CHIP)/release/bl31/bl31.elf $@

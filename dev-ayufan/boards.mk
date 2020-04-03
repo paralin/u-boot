@@ -1,8 +1,7 @@
 ifeq (rock64,$(BOARD_TARGET))
 
 UBOOT_DEFCONFIG ?= rock64-rk3328_defconfig
-UBOOT_TPL ?= tmp/rkbin/rk33/rk3328_ddr_786MHz_v1.13.bin
-BL31 ?= tmp/rkbin/rk33/rk3328_bl31_v1.39.bin
+BL31 ?= tmp/atf/rk3328/22d12c4148c373932a7a81e5d1c59a767e143ac2.elf
 BOARD_CHIP ?= rk3328
 ifneq (,$(FLASH_SPI))
 LOADER_BIN ?= tmp/rkbin/rk33/rk3328_loader_v1.08.244_for_spi_nor_build_Aug_7_2017.bin
