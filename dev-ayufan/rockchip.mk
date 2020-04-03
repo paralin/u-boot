@@ -43,3 +43,9 @@ loader-wipe:
 	rkdeveloptool rid
 	rkdeveloptool wl 64 $(UBOOT_OUTPUT_DIR)/clear.img
 	rkdeveloptool rd
+
+.PHONY: loader-writesd		# write loader to SD
+loader-writesd: $(UBOOT_OUTPUT_DIR)/rksd_loader.img
+	blkid -t PARTLABEL=loader1
+	dd if=$(UBOOT_OUTPUT_DIR)/rksd_loader.img of=$$(blkid -t PARTLABEL=loader1 -o device) bs=1M
+	sync
