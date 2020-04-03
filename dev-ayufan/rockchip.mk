@@ -10,15 +10,8 @@ loader-boot: $(UBOOT_LOADERS) $(UBOOT_TPL) $(UBOOT_SPL)
 	dd if=/dev/zero of=$(UBOOT_OUTPUT_DIR)/clear.img count=1
 	rkdeveloptool wl 64 $(UBOOT_OUTPUT_DIR)/clear.img
 	rkdeveloptool wl 512 $(UBOOT_OUTPUT_DIR)/u-boot.itb
-
-ifeq (rk3399,$(BOARD_CHIP))
-	@echo Restart device and press ENTER
-	@read XX
-	sleep 3s
-else
 	rkdeveloptool rd
 	sleep 1s
-endif
 
 ifneq (,$(UBOOT_TPL))
 	cat $(UBOOT_TPL) | openssl rc4 -K 7c4e0304550509072d2c7b38170d1711 | rkflashtool l
@@ -48,4 +41,11 @@ loader-wipe:
 loader-writesd: $(UBOOT_OUTPUT_DIR)/rksd_loader.img
 	blkid -t PARTLABEL=loader1
 	dd if=$(UBOOT_OUTPUT_DIR)/rksd_loader.img of=$$(blkid -t PARTLABEL=loader1 -o device) bs=1M
+	sync
+
+.PHONY: loader-clearsd
+loader-clearsd:
+	blkid -t PARTLABEL=loader1
+	dd if=/dev/zero of=$(UBOOT_OUTPUT_DIR)/clear.img count=1
+	dd if=$(UBOOT_OUTPUT_DIR)/clear.img of=$$(blkid -t PARTLABEL=loader1 -o device) bs=1M
 	sync
