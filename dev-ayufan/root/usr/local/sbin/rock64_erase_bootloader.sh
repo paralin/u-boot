@@ -16,16 +16,8 @@ version "$MNT_DEV"
 confirm
 
 write_sd() {
-    case "$1" in
-        /dev/mmcblk*p6|/dev/sd*p6|/dev/mapper/loop*p6|/dev/mapper/nvme*p6)
-            dd if="$2" of="${1/p6/p1}"
-            ;;
-
-        *)
-            echo "Cannot detect boot device ($MNT_DEV)."
-            exit 1
-            ;;
-    esac
+    local DEVICE="$(boot_device "$1")"
+    dd if="$2" of="${DEVICE}"
 }
 
 write_sd "$MNT_DEV" "/dev/zero"

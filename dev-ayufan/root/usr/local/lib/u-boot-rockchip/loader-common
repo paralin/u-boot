@@ -78,8 +78,27 @@ confirm() {
     done
 }
 
+boot_device() {
+    case "$1" in
+        /dev/mmcblk*p6|/dev/sd*p6|/dev/mapper/loop*p6|/dev/mapper/nvme*p6)
+            # support old partition layout with `boot`
+            echo "${1/p6/p1}"
+            ;;
+
+        /dev/mmcblk*p2|/dev/sd*p2|/dev/mapper/loop*p2|/dev/mapper/nvme*p2)
+            # support new `boot_efi`
+            echo "${1/p2/p1}"
+            ;;
+
+        *)
+            echo "Cannot detect boot device ($1)."
+            return 1
+            ;;
+    esac
+}
+
 version() {
-    local DEVICE="${1/p6/p1}"
+    local DEVICE="$(boot_device "$1")"
 
     echo -n "Current version: "
     if strings "$DEVICE" | grep "^U-Boot [a-z0-9.-]*$"; then
