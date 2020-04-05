@@ -8,6 +8,10 @@ loader-write-clear:
 	rkdeveloptool rid
 	dd if=/dev/zero of=$(UBOOT_OUTPUT_DIR)/clear.img count=1
 	rkdeveloptool wl $(LOADER_OFFSET) $(UBOOT_OUTPUT_DIR)/clear.img
+ifneq (,$(FULL_WIPE))
+	rkdeveloptool wl 512 $(UBOOT_OUTPUT_DIR)/clear.img
+	rkdeveloptool wl 1024 $(UBOOT_OUTPUT_DIR)/clear.img
+endif
 
 .PHONY: loader-write-flash
 loader-write-flash: $(UBOOT_OUTPUT_DIR)/$(LOADER_FLASH).img
@@ -38,7 +42,7 @@ loader-flash:
 .PHONY: loader-wipe		# clear loader
 loader-wipe:
 	./dev-make loader-download-mode
-	./dev-make loader-write-clear
+	./dev-make loader-write-clear FULL_WIPE=1
 	rkdeveloptool rd
 
 .PHONY: loader-writesd		# write loader to SD
