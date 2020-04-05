@@ -90,9 +90,13 @@ boot_device() {
             echo "${1/p2/p1}"
             ;;
 
+        /dev/mtd*)
+            echo "${1/mtd/mtdblock}"
+            ;;
+
         *)
-            echo "Cannot detect boot device ($1)."
-            return 1
+            echo "Cannot detect boot device ($1)." 1>&2
+            exit 1
             ;;
     esac
 }

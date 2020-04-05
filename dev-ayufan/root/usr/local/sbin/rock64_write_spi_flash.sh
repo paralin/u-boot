@@ -14,7 +14,7 @@ if ! MTD=$(grep \"loader\" /proc/mtd | cut -d: -f1); then
     exit 1
 fi
 
-version "/dev/${MTD/mtd/mtdblock}"
+version "/dev/${MTD}"
 confirm
 
 write_nand() {

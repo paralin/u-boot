@@ -14,7 +14,7 @@ if ! MTD=$(grep \"loader\" /proc/mtd | cut -d: -f1); then
     return 1
 fi
 
-version "/dev/${MTD/mtd/mtdblock}"
+version "/dev/${MTD}"
 confirm
 
 flash_erase "/dev/$MTD" 0 0
