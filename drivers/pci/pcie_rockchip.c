@@ -980,6 +980,10 @@ static int pcie_rockchip_probe(struct udevice *dev)
 		return err;
 	}
 
+	// TODO(ayufan):
+	// inject delay to increase compatibility with nvme
+	mdelay(100);
+
 	config_link(dev);
 	return 0;
 }
