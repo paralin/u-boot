@@ -14,3 +14,7 @@
 &usb_host0_xhci {
 	status = "okay";
 };
+
+&spi0 {
+	u-boot,dm-pre-reloc;
+};
