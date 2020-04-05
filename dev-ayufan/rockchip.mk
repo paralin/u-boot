@@ -14,12 +14,12 @@ ifneq (,$(FULL_WIPE))
 endif
 
 .PHONY: loader-write-flash
-loader-write-flash: $(UBOOT_OUTPUT_DIR)/$(LOADER_FLASH).img
+loader-write-flash:
 	rkdeveloptool rid
-	rkdeveloptool wl $(LOADER_OFFSET) $<
+	rkdeveloptool wl $(LOADER_OFFSET) $(UBOOT_OUTPUT_DIR)/$(LOADER_FLASH).img
 
 .PHONY: loader-boot		# boot loader over USB
-loader-boot:
+loader-boot: $(UBOOT_OUTPUT_DIR)/$(LOADER_FLASH).img
 	./dev-make loader-download-mode
 	./dev-make loader-write-flash
 	./dev-make loader-write-clear
