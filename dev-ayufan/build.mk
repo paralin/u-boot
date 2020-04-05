@@ -24,7 +24,9 @@ $(UBOOT_OUTPUT_DIR)/rksd_loader.img: $(UBOOT_OUTPUT_DIR)/u-boot.itb $(UBOOT_TPL)
 ifneq (,$(UBOOT_TPL))
 	cat $(UBOOT_SPL) >> $@.tmp
 endif
-	dd if=$(UBOOT_OUTPUT_DIR)/u-boot.itb of=$@.tmp seek=$$((0x200-64)) conv=notrunc
+	CUR_SIZE=$$(stat -c%s $@.tmp); MAX_SIZE=$$(((512-64)*512)); \
+		[ $$CUR_SIZE -le $$MAX_SIZE ] || ( echo "Too big $$CUR_SIZE < $$MAX_SIZE" && exit 1 )
+	dd if=$(UBOOT_OUTPUT_DIR)/u-boot.itb of=$@.tmp seek=$$((512-64)) conv=notrunc
 	mv $@.tmp $@
 
 $(UBOOT_OUTPUT_DIR)/rkspi_loader.img: $(UBOOT_OUTPUT_DIR)/u-boot.itb $(UBOOT_TPL) $(UBOOT_SPL)
@@ -32,10 +34,13 @@ $(UBOOT_OUTPUT_DIR)/rkspi_loader.img: $(UBOOT_OUTPUT_DIR)/u-boot.itb $(UBOOT_TPL
 ifneq (,$(UBOOT_TPL))
 	cat $(UBOOT_SPL) >> $@.tmp
 endif
+	@CUR_SIZE=$$(stat -c%s $@.tmp); MAX_SIZE=$$(((512-64)*512)); \
+		[ $$CUR_SIZE -le $$MAX_SIZE ] || ( echo "Too big $$CUR_SIZE < $$MAX_SIZE" && exit 1 )
 	# pad every 2k with 2k of zeros
-	for i in $$(seq 1 128); do dd count=4 status=none; dd if=/dev/zero count=4 status=none; done < $@.tmp > $@.tmp2
+	for i in $$(seq 1 $$((512/4))); do dd count=4 status=none; dd if=/dev/zero count=4 status=none; done < $@.tmp > $@.tmp2
 	mv $@.tmp2 $@.tmp
-	dd if=$(UBOOT_OUTPUT_DIR)/u-boot.itb of=$@.tmp seek=$$((0x400)) conv=notrunc
+	# We write at 1024 offset
+	dd if=$(UBOOT_OUTPUT_DIR)/u-boot.itb of=$@.tmp seek=$$((512*2)) conv=notrunc
 	mv $@.tmp $@
 
 .PHONY: u-boot-menuconfig		# edit u-boot config and save as defconfig

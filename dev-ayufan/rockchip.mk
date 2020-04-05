@@ -3,13 +3,22 @@ loader-download-mode: $(LOADER_BIN)
 	rkdeveloptool db $(LOADER_BIN)
 	sleep 1s
 
-.PHONY: loader-boot		# boot loader over USB
-loader-boot: $(UBOOT_LOADERS) $(UBOOT_TPL) $(UBOOT_SPL)
-	./dev-make loader-download-mode
+.PHONY: loader-write-clear
+loader-write-clear:
 	rkdeveloptool rid
 	dd if=/dev/zero of=$(UBOOT_OUTPUT_DIR)/clear.img count=1
-	rkdeveloptool wl $(SPL_FLASH_OFFSET) $(UBOOT_OUTPUT_DIR)/clear.img
-	rkdeveloptool wl $(UBOOT_FLASH_OFFSET) $(UBOOT_OUTPUT_DIR)/u-boot.itb
+	rkdeveloptool wl $(LOADER_OFFSET) $(UBOOT_OUTPUT_DIR)/clear.img
+
+.PHONY: loader-write-flash
+loader-write-flash: $(UBOOT_OUTPUT_DIR)/$(LOADER_FLASH).img
+	rkdeveloptool rid
+	rkdeveloptool wl $(LOADER_OFFSET) $<
+
+.PHONY: loader-boot		# boot loader over USB
+loader-boot:
+	./dev-make loader-download-mode
+	./dev-make loader-write-flash
+	./dev-make loader-write-clear
 	rkdeveloptool rd
 	sleep 1s
 
@@ -21,20 +30,15 @@ ifneq (,$(UBOOT_SPL))
 endif
 
 .PHONY: loader-flash		# flash loader to the device
-loader-flash: $(addprefix $(UBOOT_OUTPUT_DIR)/, $(addsuffix .img, $(FLASH_LOADER)))
+loader-flash:
 	./dev-make loader-download-mode
-	sleep 1s
-	rkdeveloptool rid
-	rkdeveloptool wl $(SPL_FLASH_OFFSET) $<
+	./dev-make loader-write-flash
 	rkdeveloptool rd
 
 .PHONY: loader-wipe		# clear loader
 loader-wipe:
-	dd if=/dev/zero of=$(UBOOT_OUTPUT_DIR)/clear.img count=1
 	./dev-make loader-download-mode
-	sleep 1s
-	rkdeveloptool rid
-	rkdeveloptool wl $(SPL_FLASH_OFFSET) $(UBOOT_OUTPUT_DIR)/clear.img
+	./dev-make loader-write-clear
 	rkdeveloptool rd
 
 .PHONY: loader-writesd		# write loader to SD
