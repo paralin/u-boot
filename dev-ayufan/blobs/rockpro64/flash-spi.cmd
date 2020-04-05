@@ -1,5 +1,5 @@
-setenv blink_power 'led power off; sleep 0.1; led power on'
-setenv blink_standby 'led standby off; sleep 0.1; led standby on'
+setenv blink_power 'led work off; sleep 0.1; led work on'
+setenv blink_standby 'led diy off; sleep 0.1; led diy on'
 
 # first read existing loader
 run blink_power

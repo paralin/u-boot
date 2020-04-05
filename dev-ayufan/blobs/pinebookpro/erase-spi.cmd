@@ -1,4 +1,4 @@
-setenv blink_power 'led power off; sleep 0.1; led power on'
+setenv blink_power 'led work off; sleep 0.1; led work on'
 
 # erase flash
 run blink_power blink_power
