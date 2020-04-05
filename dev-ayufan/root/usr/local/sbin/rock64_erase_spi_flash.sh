@@ -11,7 +11,7 @@ echo ""
 
 if ! MTD=$(grep \"loader\" /proc/mtd | cut -d: -f1); then
     echo "loader partition on MTD is not found"
-    return 1
+    exit 1
 fi
 
 version "/dev/${MTD}"
