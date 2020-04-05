@@ -18,6 +18,14 @@
 		stdout-path = "serial2:1500000n8";
 	};
 
+	config {
+		u-boot,spl-payload-offset = <0x80000>; /* @ 512KB */
+	};
+
+	aliases {
+		spi0 = &spi1;
+	};
+
 	clkin_gmac: external-gmac-clock {
 		compatible = "fixed-clock";
 		clock-frequency = <125000000>;
@@ -643,7 +651,8 @@
 &spi1 {
 	status = "okay";
 
-	flash@0 {
+	spi_flash: flash@0 {
+		u-boot,dm-pre-reloc;
 		compatible = "jedec,spi-nor";
 		reg = <0>;
 		spi-max-frequency = <10000000>;
