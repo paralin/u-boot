@@ -18,6 +18,7 @@
 &usbdrd_dwc3 {
 	status = "okay";
 	dr_mode = "host";
+	vbus-supply = <&vcc_host_5v>;
 };
 
 &spi0 {
