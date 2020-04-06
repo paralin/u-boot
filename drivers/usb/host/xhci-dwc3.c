@@ -18,10 +18,12 @@
 #include <asm/io.h>
 #include <linux/usb/dwc3.h>
 #include <linux/usb/otg.h>
+#include <power/regulator.h>
 
 struct xhci_dwc3_platdata {
 	struct phy *usb_phys;
 	int num_phys;
+	struct udevice *vbus_supply;
 };
 
 void dwc3_set_mode(struct dwc3 *dwc3_reg, u32 mode)
@@ -60,6 +62,19 @@ void dwc3_core_soft_reset(struct dwc3 *dwc3_reg)
 
 	/* After PHYs are stable we can take Core out of reset state */
 	clrbits_le32(&dwc3_reg->g_ctl, DWC3_GCTL_CORESOFTRESET);
+}
+
+static int xhci_dwc3_ofdata_to_platdata(struct udevice *dev)
+{
+	struct xhci_dwc3_platdata *plat = dev_get_platdata(dev);
+	int ret = 0;
+
+	ret = device_get_supply_regulator(dev, "vbus-supply",
+					  &plat->vbus_supply);
+	if (ret)
+		debug("Can't get VBus regulator!\n");
+
+	return 0;
 }
 
 int dwc3_core_init(struct dwc3 *dwc3_reg)
@@ -126,6 +141,14 @@ static int xhci_dwc3_probe(struct udevice *dev)
 	hcor = (struct xhci_hcor *)((uintptr_t)hccr +
 			HC_LENGTH(xhci_readl(&(hccr)->cr_capbase)));
 
+	if (plat->vbus_supply) {
+		ret = regulator_set_enable(plat->vbus_supply, true);
+		if (ret) {
+			pr_err("XHCI: failed to set VBus supply\n");
+			return ret;
+		}
+	}
+
 	ret = dwc3_setup_phy(dev, &plat->usb_phys, &plat->num_phys);
 	if (ret && (ret != -ENOTSUPP))
 		return ret;
@@ -171,6 +194,12 @@ static int xhci_dwc3_remove(struct udevice *dev)
 
 	dwc3_shutdown_phy(dev, plat->usb_phys, plat->num_phys);
 
+	if (plat->vbus_supply) {
+		int ret = regulator_set_enable(plat->vbus_supply, false);
+		if (ret)
+			pr_err("XHCI: failed to set VBus supply\n");
+	}
+
 	return xhci_deregister(dev);
 }
 
@@ -183,6 +212,7 @@ U_BOOT_DRIVER(xhci_dwc3) = {
 	.name = "xhci-dwc3",
 	.id = UCLASS_USB,
 	.of_match = xhci_dwc3_ids,
+	.ofdata_to_platdata = xhci_dwc3_ofdata_to_platdata,
 	.probe = xhci_dwc3_probe,
 	.remove = xhci_dwc3_remove,
 	.ops = &xhci_usb_ops,
