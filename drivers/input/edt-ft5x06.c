@@ -19,6 +19,7 @@
 #include <i2c.h>
 #include <touchpanel.h>
 #include <power/regulator.h>
+#include <linux/compat.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
