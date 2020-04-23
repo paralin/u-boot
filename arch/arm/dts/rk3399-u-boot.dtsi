@@ -3,6 +3,15 @@
  * Copyright (C) 2019 Jagan Teki <jagan@amarulasolutions.com>
  */
 
+/ {
+
+aliases {
+                mmc0 = &sdhci;
+                mmc1 = &sdmmc;
+                pci0 = &pcie0;
+        };
+};
+
 &cic {
 	u-boot,dm-pre-reloc;
 };
