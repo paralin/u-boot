@@ -12,11 +12,28 @@
 	};
 
 	chosen {
-		u-boot,spl-boot-order = "same-as-spl", &sdhci, &sdmmc;
+		u-boot,spl-boot-order = "same-as-spl", &spi_flash, &sdhci, &sdmmc;
 	};
 
 	config {
                 pcie-pwr-gpio = <&gpio2 RK_PD2 GPIO_ACTIVE_HIGH>;
+		u-boot,spl-payload-offset = <0x40000>; /* @ 256KB */
+        };
+
+	vcc_hub_en: vcc_hub_en-regulator {
+                compatible = "regulator-fixed";
+                enable-active-high;
+                gpio = <&gpio2 RK_PA4 GPIO_ACTIVE_HIGH>;
+                pinctrl-names = "default";
+                pinctrl-0 = <&hub_rst>;
+                regulator-name = "vcc_hub_en";
+                regulator-always-on;
+        };
+};
+
+&spi1 {
+        spi_flash: flash@0 {
+                u-boot,dm-pre-reloc;
         };
 };
 
