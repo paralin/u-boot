@@ -50,12 +50,12 @@ void board_early_led_setup(void)
 	 * 3. Once 2 done, off yellow and glow red LED, termed as full power
 	 * 4. Continue booting...
 	 */
-	spl_gpio_output(gpio0, GPIO(BANK_A, 2), 1);
+//	spl_gpio_output(gpio0, GPIO(BANK_A, 2), 1);
 
-	spl_gpio_set_pull(&pmugrf->gpio0_p, GPIO(BANK_A, 5), GPIO_PULL_NORMAL);
-	while (readl(&gpio0->ext_port) & 0x20);
+//	spl_gpio_set_pull(&pmugrf->gpio0_p, GPIO(BANK_A, 5), GPIO_PULL_NORMAL);
+//	while (readl(&gpio0->ext_port) & 0x20);
 
-	spl_gpio_output(gpio0, GPIO(BANK_A, 2), 0);
+//	spl_gpio_output(gpio0, GPIO(BANK_A, 2), 0);
 	spl_gpio_output(gpio0, GPIO(BANK_B, 5), 1);
 }
 
