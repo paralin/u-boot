@@ -1080,6 +1080,11 @@ config PINEPHONE_DT_SELECTION
 	  Enable this option to automatically select the device tree for the
 	  correct PinePhone hardware revision during boot.
 
+config PINEPHONE_LEDS
+	bool "Enable PinePhone LED boot status notify"
+	help
+	  Enable this option to set the LEDs while booting.
+
 config BLUETOOTH_DT_DEVICE_FIXUP
 	string "Fixup the Bluetooth controller address"
 	default ""
