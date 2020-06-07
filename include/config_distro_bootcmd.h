@@ -216,7 +216,11 @@
 #endif
 
 #ifdef CONFIG_SCSI
+#if defined(CONFIG_CMD_PCI) && defined(CONFIG_SCSI_AHCI) && defined(CONFIG_AHCI_PCI)
+#define BOOTENV_RUN_SCSI_INIT BOOTENV_RUN_PCI_ENUM "run scsi_init; "
+#else
 #define BOOTENV_RUN_SCSI_INIT "run scsi_init; "
+#endif
 #define BOOTENV_SET_SCSI_NEED_INIT "scsi_need_init=; "
 #define BOOTENV_SHARED_SCSI \
 	"scsi_init=" \
