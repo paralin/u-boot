@@ -799,6 +799,8 @@ config ARCH_OMAP2PLUS
 
 config ARCH_MESON
 	bool "Amlogic Meson"
+	select OF_LIBFDT
+	select OF_LIBFDT_OVERLAY
 	imply DISTRO_DEFAULTS
 	imply DM_RNG
 	help
