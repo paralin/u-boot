@@ -26,19 +26,19 @@ static void reset_cpus(int stop)
 	}
 }
 
-static int do_arisc_start(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
+static int do_arisc_start(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
 	reset_cpus(0);
 	return 0;
 }
 
-static int do_arisc_stop(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
+static int do_arisc_stop(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
 	reset_cpus(1);
 	return 0;
 }
 
-static int do_arisc_takeover(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
+static int do_arisc_takeover(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
 	reset_cpus(0);
 

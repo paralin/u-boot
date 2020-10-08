@@ -4,7 +4,7 @@
 #include <dm.h>
 #include <backlight.h>
 
-static int do_backlight(cmd_tbl_t *cmdtp, int flag, int argc,
+static int do_backlight(struct cmd_tbl *cmdtp, int flag, int argc,
 			char *const argv[])
 {
 	struct udevice *backlight;

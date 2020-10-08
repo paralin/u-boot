@@ -98,7 +98,7 @@ static void dump_regs(void)
 */
 }
 
-static int do_mydbg(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
+static int do_mydbg(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
 	dump_regs();
 

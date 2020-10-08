@@ -7,7 +7,7 @@
 #include <cli_hush.h>
 #include <axp_pmic.h>
 
-static int do_axp(cmd_tbl_t *cmdtp, int flag, int argc,
+static int do_axp(struct cmd_tbl *cmdtp, int flag, int argc,
 		  char *const argv[])
 {
 	int ret = 0, val;

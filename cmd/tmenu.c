@@ -124,7 +124,7 @@ static void painter_char(struct painter* p, char ch, u32 color)
 
 // menu command
 
-static int handle_tmenu(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[], int no_touch)
+static int handle_tmenu(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[], int no_touch)
 {
 	struct udevice *vdev, *tdev;
 	struct video_priv *vpriv;
@@ -255,17 +255,17 @@ next:
 	return CMD_RET_SUCCESS;
 }
 
-static int do_tmenu_render(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
+static int do_tmenu_render(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
 	return handle_tmenu(cmdtp, flag, argc, argv, 1);
 }
 
-static int do_tmenu_input(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
+static int do_tmenu_input(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
 	return handle_tmenu(cmdtp, flag, argc, argv, 0);
 }
 
-static int do_tmenu(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
+static int do_tmenu(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 {
 	int ret;
 	

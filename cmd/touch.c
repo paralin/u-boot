@@ -8,7 +8,7 @@
 #include <dm.h>
 #include <touchpanel.h>
 
-static int do_touch_list(cmd_tbl_t *cmdtp, int flag, int argc,
+static int do_touch_list(struct cmd_tbl *cmdtp, int flag, int argc,
 		       char *const argv[])
 {
 	struct udevice *dev;
@@ -31,7 +31,7 @@ static int do_touch_list(cmd_tbl_t *cmdtp, int flag, int argc,
 	return CMD_RET_SUCCESS;
 }
 
-static int do_touch_info(cmd_tbl_t *cmdtp, int flag, int argc,
+static int do_touch_info(struct cmd_tbl *cmdtp, int flag, int argc,
 		       char *const argv[])
 {
 	struct touchpanel_priv *uc_priv;
@@ -56,7 +56,7 @@ static int do_touch_info(cmd_tbl_t *cmdtp, int flag, int argc,
 	return CMD_RET_SUCCESS;
 }
 
-static int do_touch_get(cmd_tbl_t *cmdtp, int flag, int argc,
+static int do_touch_get(struct cmd_tbl *cmdtp, int flag, int argc,
 			char *const argv[])
 {
 	//struct touchpanel_priv *uc_priv;
@@ -103,16 +103,16 @@ static int do_touch_get(cmd_tbl_t *cmdtp, int flag, int argc,
 	return CMD_RET_SUCCESS;
 }
 
-static cmd_tbl_t cmd_touch_sub[] = {
+static struct cmd_tbl cmd_touch_sub[] = {
 	U_BOOT_CMD_MKENT(list, 1, 1, do_touch_list, "", ""),
 	U_BOOT_CMD_MKENT(info, 2, 1, do_touch_info, "", ""),
 	U_BOOT_CMD_MKENT(get, 2, 1, do_touch_get, "", ""),
 };
 
-static int do_touch(cmd_tbl_t *cmdtp, int flag, int argc,
+static int do_touch(struct cmd_tbl *cmdtp, int flag, int argc,
 		  char *const argv[])
 {
-	cmd_tbl_t *c;
+	struct cmd_tbl *c;
 
 	if (argc < 2)
 		return CMD_RET_USAGE;
