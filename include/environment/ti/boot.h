@@ -228,6 +228,11 @@
 		"setenv dofastboot 0; saveenv;" \
 		FASTBOOT_CMD \
 	"fi;" \
+	"setenv mmcdev 0; " \
+	"setenv devtype mmc; " \
+	"run cfgload;" \
+	"setenv mmcdev 1; " \
+	"run cfgload;"      \
 	"if test ${boot_fit} -eq 1; then "	\
 		"run update_to_fit;"	\
 	"fi;"	\
