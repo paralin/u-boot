@@ -170,6 +170,11 @@ config CMD_SBI
 	help
 	  Display information about the SBI implementation.
 
+config CMD_ODROID_HWREV
+	bool "hwrev check for hardkernel's rk3326 boards"
+	help
+	  This enables hw revision check function for ODROID GO-Advanced board. 
+
 endmenu
 
 menu "Boot commands"

@@ -12,6 +12,7 @@ obj-y += panic.o
 obj-y += version.o
 
 # command
+obj-$(CONFIG_CMD_ODROID_HWREV) += hwrev.o 
 obj-$(CONFIG_CMD_ACPI) += acpi.o
 obj-$(CONFIG_CMD_AES) += aes.o
 obj-$(CONFIG_CMD_AB_SELECT) += ab_select.o
