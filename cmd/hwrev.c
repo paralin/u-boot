@@ -22,22 +22,22 @@ int do_hwrev(struct cmd_tbl *cmdtp, int flag, int argc, char * const argv[])
 	/* GO2 rev 1.1 */
 	if (check_range(655, 695, hwrev_adc)) {
 		env_set("hwrev", "v11");
-		env_set("dtb_name", "/boot/rk3326-odroidgo2-v11.dtb");
+		env_set("dtb_name", "/boot/rk3326-odroid-go2-v11.dtb");
 	}
 	/* GO2 rev 1.0 */
 	else if (check_range(816, 896, hwrev_adc)) {
 		env_set("hwrev", "v10");
-		env_set("dtb_name", "/boot/rk3326-odroidgo2.dtb");
+		env_set("dtb_name", "/boot/rk3326-odroid-go2.dtb");
 	}
 	/* GO3 rev 1.0 */
 	else if (check_range(40, 126, hwrev_adc)) {
 		env_set("hwrev", "v10-go3");
-		env_set("dtb_name", "/boot/rk3326-odroidgo3.dtb");
+		env_set("dtb_name", "/boot/rk3326-odroid-go3.dtb");
 	}
 	/* engineer samples */
 	else {
 		env_set("hwrev", "v00");
-		env_set("dtb_name", "/boot/rk3326-odroidgo2.dtb");
+		env_set("dtb_name", "/boot/rk3326-odroid-go2.dtb");
 	}
 
 	printf("adc0 (hw rev) %d\n", hwrev_adc);
