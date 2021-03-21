@@ -40,6 +40,8 @@ int do_hwrev(struct cmd_tbl *cmdtp, int flag, int argc, char * const argv[])
 		env_set("dtb_name", "/boot/rk3326-odroid-go2.dtb");
 	}
 
+	env_set("bootargs", "console=ttyS2,115200 root=/dev/mmcblk0p1 rootfstype=f2fs console=tty0 fbcon=rotate:3 rw quiet");
+
 	printf("adc0 (hw rev) %d\n", hwrev_adc);
 
 	return CMD_RET_SUCCESS;
