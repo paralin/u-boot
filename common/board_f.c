@@ -227,12 +227,14 @@ static int show_dram_config(void)
 		print_size(gd->bd->bi_dram[i].size, "\n");
 #endif
 	}
-	debug("\nDRAM:  ");
+	debug("\nDRAM Size:  ");
 
 	print_size(size, "");
 	board_add_ram_info(0);
 	putc('\n');
-
+#if defined(CONFIG_DRAM_CLK)
+	printf("DRAM Clock: %d MHz\n", CONFIG_DRAM_CLK);
+#endif
 	return 0;
 }
 
