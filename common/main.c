@@ -46,6 +46,13 @@ void main_loop(void)
 	if (IS_ENABLED(CONFIG_VERSION_VARIABLE))
 		env_set("ver", version_string);  /* set version variable */
 
+#if defined(CONFIG_DRAM_CLK)
+	char ram_clk_string[11];
+	sprintf(ram_clk_string, "%d", CONFIG_DRAM_CLK);
+	env_set("ram_freq", ram_clk_string);
+	printf("Set ram_freq : %s\n", ram_clk_string);
+#endif
+
 	cli_init();
 
 	if (IS_ENABLED(CONFIG_USE_PREBOOT))
