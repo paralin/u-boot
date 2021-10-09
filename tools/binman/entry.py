@@ -465,7 +465,9 @@ class Entry(object):
             if self.offset_unset:
                 self.Raise('No offset set with offset-unset: should another '
                            'entry provide this correct offset?')
-            self.offset = tools.align(offset, self.align)
+        elif self.offset > offset:
+            offset = self.offset
+        self.offset = tools.align(offset, self.align)
         needed = self.pad_before + self.contents_size + self.pad_after
         needed = tools.align(needed, self.align_size)
         size = self.size
