@@ -14,6 +14,12 @@
 
 #include <asm/arch/cpu.h>
 
+#ifdef SUNXI_SRAM_A2_SIZE
+#define SUNXI_RESUME_BASE		(CONFIG_ARMV7_SECURE_BASE + \
+					 CONFIG_ARMV7_SECURE_MAX_SIZE)
+#define SUNXI_RESUME_SIZE		1024
+#endif
+
 /*
  * Include common sunxi configuration where most the settings are
  */
