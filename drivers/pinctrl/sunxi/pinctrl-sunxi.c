@@ -9,6 +9,7 @@
 #include <malloc.h>
 
 #include <asm/gpio.h>
+#include "../../../arch/arm/include/asm/arch-sunxi/gpio.h"
 
 extern U_BOOT_DRIVER(gpio_sunxi);
 
