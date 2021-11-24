@@ -70,7 +70,7 @@ unsigned long timer_read_counter(void)
 	isb();
 	do {
 		asm volatile("mrs %0, cntpct_el0" : "=r" (cntpct));
-	} while (((cntpct + 1) & GENMASK(10, 0)) <= 1);
+	} while (((cntpct + 1) & GENMASK(8, 0)) <= 1);
 
 	return cntpct;
 }
