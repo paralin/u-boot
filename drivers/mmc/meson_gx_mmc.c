@@ -68,7 +68,8 @@ static void meson_mmc_config_clock(struct mmc *mmc)
 	 * Other SoCs use CLK_CO_PHASE_180 by default.
 	 * It needs to find what is a proper value about each SoCs.
 	 */
-	if (meson_gx_mmc_is_compatible(mmc->dev, MMC_COMPATIBLE_SM1))
+	if (meson_gx_mmc_is_compatible(mmc->dev, MMC_COMPATIBLE_SM1) ||
+            meson_gx_mmc_is_compatible(mmc->dev, MMC_COMPATIBLE_AXG))
 		meson_mmc_clk |= CLK_CO_PHASE_270;
 	else
 		meson_mmc_clk |= CLK_CO_PHASE_180;
@@ -322,7 +323,7 @@ int meson_mmc_bind(struct udevice *dev)
 
 static const struct udevice_id meson_mmc_match[] = {
 	{ .compatible = "amlogic,meson-gx-mmc", .data = MMC_COMPATIBLE_GX },
-	{ .compatible = "amlogic,meson-axg-mmc", .data = MMC_COMPATIBLE_GX },
+	{ .compatible = "amlogic,meson-axg-mmc", .data = MMC_COMPATIBLE_AXG },
 	{ .compatible = "amlogic,meson-sm1-mmc", .data = MMC_COMPATIBLE_SM1 },
 	{ /* sentinel */ }
 };

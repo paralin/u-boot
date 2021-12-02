@@ -12,6 +12,7 @@
 enum meson_gx_mmc_compatible {
 	MMC_COMPATIBLE_GX,
 	MMC_COMPATIBLE_SM1,
+	MMC_COMPATIBLE_AXG,
 };
 
 #define SDIO_PORT_A			0
