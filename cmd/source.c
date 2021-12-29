@@ -135,7 +135,7 @@ source (ulong addr, const char *fit_uname)
 		{
 			char magic[32];
 			int size = snprintf(magic, sizeof(magic),
-					"%s-uboot-config", CONFIG_SYS_BOARD);
+					    "%s-uboot-config", /*CONFIG_SYS_BOARD*/ "ODROIDGO2");
 			if (strncasecmp(buf, magic, strlen(magic))) {
 				puts ("Wrong image format for \"source\" command\n");
 				return 1;
