@@ -131,7 +131,7 @@ jobs:
         cp '$(System.DefaultWorkingDirectory)/spi_u-boot/$(script_name).scr' boot.scr
         cp '$(System.DefaultWorkingDirectory)/spi_u-boot/spi_combined.img' spi_combined.img
         dd if=/dev/zero of=boot.tmp bs=1M count=16
-        mkfs.vfat -n u-boot-script boot.tmp
+        mkfs.vfat -n u-boot-scpt boot.tmp
         mcopy -sm -i boot.tmp boot.scr ::
         mcopy -sm -i boot.tmp spi_combined.img ::
         dd if=/dev/zero of=$(script_name).img bs=1M count=32
