@@ -9,6 +9,7 @@ dtb-$(CONFIG_TARGET_SIFIVE_UNMATCHED) += hifive-unmatched-a00.dtb
 dtb-$(CONFIG_TARGET_SIPEED_MAIX) += k210-maix-bit.dtb
 dtb-$(CONFIG_TARGET_SUNXI) += \
 	sun20i-d1-lichee-rv.dtb \
+	sun20i-d1-lichee-rv-86-panel.dtb \
 	sun20i-d1-lichee-rv-dock.dtb \
 	sun20i-d1-nezha.dtb
 
