@@ -364,7 +364,10 @@ config SYS_TEXT_BASE
 	default 0x80800000 if ARCH_OMAP2PLUS || ARCH_K3
 	default 0x81700000 if MACH_SUNIV
 	default 0x2a000000 if MACH_SUN9I
-	default 0x42e00000 if MACH_SUN8I_V3S
+	# We should use the smaller address like V3S to support D1s,
+	# but this is a breaking change.
+	default 0x4a000000 if MACH_SUN20I
+	default 0x42e00000 if MACH_SUN8I_V3S || MACH_SUN20I
 	default 0x4a000000 if ARCH_SUNXI
 	hex "Text Base"
 	help

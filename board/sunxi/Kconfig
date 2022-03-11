@@ -61,16 +61,13 @@ config SYS_BOARD
 	default "sunxi"
 
 config SYS_CONFIG_NAME
-	default "sun20i" if MACH_SUN20I
+	default "sunxi-common" if MACH_SUN20I
 
 config SYS_CPU
 	default "generic" if MACH_SUN20I
 
 config SYS_SOC
 	default "sunxi"
-
-config SYS_TEXT_BASE
-	default 0x4a000000 if MACH_SUN20I
 
 config BOARD_SPECIFIC_OPTIONS
 	def_bool y
