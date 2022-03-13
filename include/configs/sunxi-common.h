@@ -18,7 +18,7 @@
 
 #include <linux/stringify.h>
 
-#ifdef CONFIG_ARM64
+#if defined(CONFIG_ARM64) || defined(CONFIG_RISCV)
 #define CONFIG_SYS_BOOTM_LEN		(32 << 20)
 #endif
 
