@@ -226,11 +226,11 @@ int axp_init(void)
 	 * Turn off LDOIO regulators / tri-state GPIO pins, when rebooting
 	 * from android these are sometimes on.
 	 */
-	ret = pmic_bus_write(AXP_GPIO0_CTRL, AXP_GPIO_CTRL_INPUT);
+	ret = pmic_bus_write(AXP221_GPIO0_CTRL, AXP221_GPIO_CTRL_INPUT);
 	if (ret)
 		return ret;
 
-	ret = pmic_bus_write(AXP_GPIO1_CTRL, AXP_GPIO_CTRL_INPUT);
+	ret = pmic_bus_write(AXP221_GPIO1_CTRL, AXP221_GPIO_CTRL_INPUT);
 	if (ret)
 		return ret;
 
